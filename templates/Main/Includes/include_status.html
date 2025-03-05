@@ -1,0 +1,40 @@
+<!-- Status Buttons -->
+<div class="flex gap-2 w-full m-4">
+    {% for code, label in STATUS_CHOICES %}
+        {% if lead.status > code %}
+            <!-- Botão para retornar status via HTMX -->
+            <button 
+                hx-get="{% url 'get_form_retorno_status' lead.id code %}" 
+                hx-target="#modal-container"
+                hx-trigger="click"
+                hx-swap="outerHTML"
+                class="flex-1 text-center px-4 py-2 rounded-full border 
+                    bg-gray-500 text-gray-300 border-gray-600 font-bold cursor-pointer 
+                    hover:bg-gray-700 hover:border-gray-800 transition-all duration-200">
+                <strong>{{ label }}</strong>
+            </button>
+        {% else %}
+            <!-- Status normal -->
+            <div class="flex-1 text-center px-4 py-2 rounded-full border 
+                {% if lead.status == code %} 
+                    bg-blue-500 text-white border-blue-500 font-bold 
+                {% else %} 
+                    bg-gray-300 text-gray-700 border-gray-400 
+                {% endif %}">
+                <strong>{{ label }}</strong>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div id="modal-container"></div>
+
+<script>
+        function closeModal(event) {
+    // Se um evento foi passado, verifica se o clique foi no fundo e não no conteúdo do modal
+    if (event && event.target.id !== "modal-container") return;
+
+    // Limpa o conteúdo do modal sem remover a div principal
+    document.getElementById("modal-container").innerHTML = "";
+    }
+</script>

@@ -1,0 +1,16 @@
+<span id="status-badge-{{ lead.id }}" 
+      class="px-2 ml-2 py-1 text-xs font-semibold 
+        {% if lead.status_apc == 0 %} text-red-800 bg-red-200 
+        {% else %} text-yellow-800 bg-yellow-200 
+        {% endif %} 
+        rounded-full cursor-pointer"
+      hx-put="{% url 'alternar_status_apc' lead.id %}"
+      hx-target="#status-badge-{{ lead.id }}"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% if lead.status_apc == 0 %}
+        Não Cotado
+    {% else %}
+        Aguardando Retorno
+    {% endif %}
+</span>

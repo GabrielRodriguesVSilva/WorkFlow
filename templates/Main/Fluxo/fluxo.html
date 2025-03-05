@@ -1,0 +1,75 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+
+
+{% block title %}Icetar - Fluxo{% endblock %}
+
+{% block content %}
+<div class="p-2">
+    <!-- Título com Ícone -->
+    <div class="flex items-center text-white text-2xl font-bold">
+        <span class="material-symbols-outlined text-2xl mr-2" translate="no">sync_alt</span>
+        Fluxo
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-1">
+
+    
+    <div class="overflow-x-auto flex-1 custom-scroll">
+        <div class="flex space-x-4 min-w-max pt-2">
+            {% for status, nome in status_choices.items %}
+                <div class="w-64 bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col ml-2">
+                    <!-- Título da Coluna -->
+                    <h4 class="text-lg font-bold mb-3 text-center p-1 rounded border-b-4 bg-gray-900
+                        {% if status == 0 %}border-yellow-600
+                        {% elif status == 1 %}border-indigo-900
+                        {% elif status == 2 %}border-cyan-800
+                        {% elif status == 3 %}border-emerald-900
+                        {% elif status == 4 %}border-amber-800
+                        {% elif status == 5 %}border-orange-800
+                        {% elif status == 6 %}border-green-900
+                        {% endif %}">
+                        {{ nome }}
+                    </h4>
+    
+                    <!-- Leads dentro da coluna -->
+                    <div class="flex-1 overflow-y-auto max-h-[75vh] custom-scroll">
+                        {% for lead in leads_por_status|get_item:status %}
+                            {% include 'Main/Fluxo/Includes/lead.html' %}
+                        {% empty %}
+                            <p class="text-gray-400 text-sm text-center">Nenhum lead</p>
+                        {% endfor %}
+                    </div>
+    
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+</div>
+
+<!-- Botão flutuante para adicionar lead -->
+<button id="openModal" class="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-800 transition z-50">
+    <span class="material-symbols-outlined text-2xl" translate="no">add</span>
+</button>
+
+<!-- Modal -->
+<div id="leadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    {% include 'Main/Fluxo/Includes/buscar_cliente.html' %}
+</div>
+
+<!-- Script para abrir/fechar o modal -->
+<script>
+    document.getElementById('openModal').addEventListener('click', function() {
+        document.getElementById('leadModal').classList.remove('hidden');
+    });
+
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('leadModal').classList.add('hidden');
+    });
+</script>
+
+{% endblock %}

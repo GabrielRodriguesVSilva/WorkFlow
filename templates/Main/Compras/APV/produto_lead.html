@@ -1,0 +1,34 @@
+<tr class="border border-gray-700">
+    <td class="p-2 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
+    <td class="p-2 border border-gray-700">
+        {{ produto_lead.produto.descricao|safe|truncatechars:25 }}
+    </td>                        
+    <td class="p-2 border border-gray-700">{{ produto_lead.quantidade }}</td>
+    <td class="p-2 border border-gray-700">{{ produto_lead.prazo }}</td>
+    <td class="p-2 border border-gray-700">{{ produto_lead.validade }}</td>
+    <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto.custo_unitario|floatformat:2 }}</td>
+    <td class="p-2 border border-gray-700">R$ 0,00</td>
+    
+    <!-- Campo editável - Custo -->
+    <td class="p-2 border border-gray-700">
+        R$ 
+        <input type="text" 
+            name="valor_unitario" 
+            value="{{ produto_lead.valor_unitario|default:0|floatformat:2 }}" 
+            class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center"
+            pattern="[0-9]+([.,][0-9]+)?" required>
+    </td>
+
+    <!-- Botão de Salvar -->
+    <td class="p-2 text-center border border-gray-700">
+        <button 
+            class="text-green-500 hover:text-green-700"
+            hx-post="{% url 'editar_produto_lead_apv' produto_lead.id %}"
+            hx-target="closest tr"
+            hx-include="closest tr"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'> 
+            <span class="material-symbols-outlined">edit</span>
+        </button>
+    </td>
+</tr>

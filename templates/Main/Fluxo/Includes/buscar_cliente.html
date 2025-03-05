@@ -1,0 +1,44 @@
+<!-- Modal -->
+<div class="fixed inset-0 flex items-start justify-center bg-gray-900 bg-opacity-10 top-10">
+    <div class="bg-gray-900 p-6 rounded-2xl shadow-xl w-[800px] text-white relative max-h-[90vh] overflow-auto custom-scroll">
+        
+        <!-- Botão de Fechar -->
+        <button type="button" id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition">
+            <span class="material-symbols-outlined text-3xl">close</span>
+        </button>
+
+        <h3 class="text-2xl font-semibold mb-6">Novo Lead</h3>
+
+        <!-- Título do campo com o logo da Omie -->
+        <div class="flex items-center mb-2">
+            <img src="https://www.omie.com.br/assets/images/logo-omie.png" alt="Omie Logo" class="h-6 mr-2">
+            <span class="text-gray-300 text-sm">Buscar CNPJ ou CPF do Cliente na Omie</span>
+        </div>
+
+        <div class="relative">
+            <label for="cliente-input" class="sr-only">Digite o CNPJ ou CPF do cliente para buscar na Omie</label>
+            <input type="text" name="cliente" id="cliente-input"
+                class="w-full p-3 border border-gray-600 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                required hx-get="{% url 'buscar_clientes' %}" 
+                hx-trigger="keyup[keyCode==13]" 
+                hx-target="#clientes-sugestoes"
+                hx-indicator=".htmx-indicator"
+                placeholder="Digite o CNPJ ou CPF do cliente">
+
+            <!-- Ícone de busca (aciona a busca ao clicar) -->
+            <span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer"
+                hx-get="{% url 'buscar_clientes' %}" 
+                hx-target="#clientes-sugestoes"
+                hx-include="#cliente-input"
+                hx-indicator=".htmx-indicator">
+                search
+            </span>
+        </div>
+
+        <!-- Spinner de carregamento -->
+        <div class="htmx-indicator mt-2 text-gray-400">🔄 Buscando...</div>
+
+        <div id="clientes-sugestoes" class="flex flex-col items-center justify-center w-full text-center"></div>
+
+    </div>
+</div>

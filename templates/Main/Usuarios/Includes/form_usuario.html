@@ -1,0 +1,56 @@
+<div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
+    <div class="mt-4 p-4 rounded-lg bg-gray-900">
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Nome de Usuário -->
+            <div class="flex flex-col">
+                <label for="username" class="text-white mb-2">Nome de Usuário</label>
+                <input type="text" id="username" name="username" value="{{ user_edit.username }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            </div>
+
+            <!-- Primeiro Nome -->
+            <div class="flex flex-col">
+                <label for="first_name" class="text-white mb-2">Primeiro Nome</label>
+                <input type="text" id="first_name" name="first_name" value="{{ user_edit.first_name }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            </div>
+
+            <!-- Sobrenome -->
+            <div class="flex flex-col">
+                <label for="last_name" class="text-white mb-2">Sobrenome</label>
+                <input type="text" id="last_name" name="last_name" value="{{ user_edit.last_name }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            </div>
+
+            <!-- E-mail -->
+            <div class="flex flex-col">
+                <label for="email" class="text-white mb-2">E-mail</label>
+                <input type="email" id="email" name="email" value="{{ user_edit.email }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            </div>
+
+            <!-- Senha (opcional) -->
+            <div class="flex flex-col">
+                <label for="password" class="text-white mb-2">Senha</label>
+                <input type="password" id="password" name="password" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white">
+            </div>
+
+            <!-- Foto de Perfil -->
+            <div class="flex flex-col">
+                <label for="foto" class="text-white mb-2">Foto de Perfil</label>
+                <input type="file" id="foto" name="foto" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white">
+                
+                {% if user_edit.perfil.foto %}
+                    <!-- Exibe a foto atual -->
+                    <div class="mt-2">
+                        <label class="text-white">Foto atual:</label>
+                        <img src="{{ user_edit.perfil.foto.url }}" alt="Foto de Perfil" class="w-20 h-20 rounded-full object-cover mt-2">
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Botão de Submissão -->
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>

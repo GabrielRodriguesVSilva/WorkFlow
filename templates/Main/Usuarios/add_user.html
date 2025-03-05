@@ -1,0 +1,24 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Icetar - Usuários{% endblock %}
+
+{% block content %}
+
+<div class="p-4">
+
+    <!-- Título com Ícone -->
+    <div class="flex items-center text-white text-2xl font-bold mb-4">
+        <span class="material-symbols-outlined text-2xl mr-2" translate="no">group</span>
+        Cadastrar Novo Usuário
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-4">
+
+    {% include 'Main/Usuarios/Includes/form_usuario.html' %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+
+
+{% block title %}Icetar - APC{% endblock %}
+
+{% block content %}
+
+<div class="p-2">
+
+    <div class="flex items-center text-white text-2xl font-bold">
+        <a href="{% url 'apc' %}">
+            <span class="material-symbols-outlined text-2xl mr-2" translate="no">arrow_back_ios_new</span>
+        </a>
+        APC - Lead N° {{ lead.id }} - {{ lead.cliente.nome_fantasia|truncatechars:30 }}
+        <span id="status-badge-{{ lead.id }}" 
+                class="px-2 ml-2 py-1 text-xs font-semibold 
+                {% if lead.status_apc == 0 %} text-red-800 bg-red-200 
+                {% else %} text-yellow-800 bg-yellow-200 
+                {% endif %} 
+                rounded-full cursor-pointer"
+                hx-put="{% url 'alternar_status_apc' lead.id %}"
+                hx-target="#status-badge-{{ lead.id }}"
+                hx-swap="outerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+            {% if lead.status_apc == 0 %}
+                Não Cotado
+            {% else %}
+                Aguardando Retorno
+            {% endif %}
+        </span>
+  
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-1">
+
+    <!-- Linha de Progresso dos Status -->
+
+    {% include 'Main/includes/include_status.html' %}
+
+    <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
+        <div class="mt-4 p-4 rounded-lg bg-gray-900 shadow-lg">
+            <div class="flex justify-between items-center cursor-pointer toggle-section">
+                <h2 class="text-lg font-semibold text-white">Orçamento do Lead</h2>
+            </div>
+        
+            <hr class="border-t-2 border-white my-2">
+
+            <div class="flex items-end gap-2 mt-4 rounded-lg">
+                <div class="w-32">
+                    <label class="text-white text-sm">Código:</label>
+                    <input type="text" name="codigo_produto" id="codigo-input" 
+                        class="w-full p-2 bg-gray-900 text-white rounded-lg border border-gray-700" > 
+                </div>
+                <div class="w-24">
+                    <label class="text-white text-sm">Qnt:</label>
+                    <input type="number" name="qnt_produto" min="1" value="1" 
+                        class="w-full p-2 bg-gray-900 text-white rounded-lg border border-gray-700">
+                </div>
+                <button class="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg transition flex items-center justify-center h-10"
+                    hx-get="{% url 'buscar_produto_apc' lead.id %}" 
+                    hx-target="#produto-list"
+                    hx-include="#codigo-input, [name='qnt_produto']"
+                    hx-indicator=".htmx-indicator"
+                    hx-swap="beforeend">
+                 <span class="material-symbols-outlined text-lg">search</span>
+                </button>
+                <div class="htmx-indicator text-white mt-2 hidden">Buscando...</div>
+            </div>
+            <table class="w-full mt-4 border-collapse bg-gray-900 text-white rounded-lg shadow-lg">
+                <thead>
+                    <tr class="bg-gray-800 text-white">
+                        <th class="p-2 border border-gray-700">Código</th>
+                        <th class="p-2 border border-gray-700">Descrição</th>
+                        <th class="p-2 border border-gray-700">Características</th>
+                        <th class="p-2 border border-gray-700">Data</th>
+                        <th class="p-2 border border-gray-700">Qnt</th>
+                        <th class="p-2 border border-gray-700">Prazo</th>
+                        <th class="p-2 border border-gray-700">Val</th>
+                        <th class="p-2 border border-gray-700">Custo</th>
+                        <th class="p-2 border border-gray-700">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="produto-list">
+                    {% for produto_lead in produtos_lead %}
+                    <tr class="border border-gray-700">
+                        <td class="p-2 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
+                        <td class="p-2 border border-gray-700">
+                            {{ produto_lead.produto.descricao|safe|truncatechars:50 }}
+                        </td>                        
+                        <td class="p-2 border border-gray-700">{% for caracteristica in produto_lead.produto.caracteristicas.all %}{% if caracteristica.nome == 'REFERENCIA' %}{{ caracteristica.conteudo }}{% endif %}{% endfor %}</td>
+                        <td class="p-2 border border-gray-700">{{ produto_lead.produto.data_modificacao|date:"d/m/Y"|default:"-" }}</td>
+
+                        <!-- Campo editável - Quntidade -->
+                        <td class="p-2 border border-gray-700">
+                            <input type="text" 
+                                name="qnt" 
+                                value="{{ produto_lead.quantidade|default:0 }}" 
+                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+                        </td>
+                        
+                        <!-- Campo editável - Prazo -->
+                        <td class="p-2 border border-gray-700">
+                            <input type="text" 
+                                name="prazo" 
+                                value="{{ produto_lead.prazo|default:0 }}" 
+                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+                        </td>
+
+                        <!-- Campo editável - Val -->
+                        <td class="p-2 border border-gray-700">
+                            <input type="text" 
+                                name="val" 
+                                value="{{ produto_lead.validade|default:0 }}" 
+                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+                        </td>
+
+                        <!-- Campo editável - Custo -->
+                        <td class="p-2 border border-gray-700">
+                            <input type="text" 
+                                name="custo" 
+                                value="{{ produto_lead.custo_unitario|default:'' }}" 
+                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+                        </td>
+
+                        <!-- Botão de Salvar -->
+                        <td class="p-2 text-center border border-gray-700">
+                            <button 
+                                class="text-green-500 hover:text-green-700"
+                                hx-post="{% url 'editar_produto_lead_apc' produto_lead.id %}"
+                                hx-target="closest tr"
+                                hx-include="closest tr"
+                                hx-swap="outerHTML"
+                                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'> 
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+
+                            <button 
+                                class="text-red-500 hover:text-red-700"
+                                hx-get="{% url 'deletar_produto_lead' produto_lead.id %}"
+                                hx-target="closest tr"
+                                hx-swap="outerHTML">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+            <form method="POST" action="{% url 'edit_lead_apc' lead.id %}">
+                {% csrf_token %}
+                <div class="mb-4 mt-4">
+                    <label class="text-white text-sm">Informações para Vendas:</label>
+                    <textarea name="apc_analise" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600"></textarea>
+                </div>
+    
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Enviar APC
+                </button>
+
+            </form>
+            
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+<tr class="border border-gray-700">
+    <td class="p-2 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
+    <td class="p-2 border border-gray-700">
+        {{ produto_lead.produto.descricao|safe|truncatechars:50 }}
+    </td>                        
+    <td class="p-2 border border-gray-700">
+        {% for caracteristica in produto_lead.produto.caracteristicas.all %}
+            {% if caracteristica.nome == 'REFERENCIA' %}
+                {{ caracteristica.conteudo }}
+            {% endif %}
+        {% endfor %}
+    </td>
+    <td class="p-2 border border-gray-700">
+        {{ produto_lead.produto.data_modificacao|date:"d/m/Y"|default:"-" }}
+    </td>
+
+    <td class="p-2 border border-gray-700">
+        <input type="text" 
+            name="qnt" 
+            value="{{ produto_lead.quantidade|default:0 }}" 
+            class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+    </td>
+    
+    <td class="p-2 border border-gray-700">
+        <input type="text" 
+            name="prazo" 
+            value="{{ produto_lead.prazo|default:0 }}" 
+            class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+    </td>
+
+    <td class="p-2 border border-gray-700">
+        <input type="text" 
+            name="val" 
+            value="{{ produto_lead.validade|default:0 }}" 
+            class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+    </td>
+
+    <td class="p-2 border border-gray-700">
+        <input type="text" 
+            name="custo" 
+            value="{{ produto_lead.custo_unitario|default:'' }}" 
+            class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center" pattern="[0-9]+([.,][0-9]+)?" required>
+    </td>
+
+    <td class="p-2 text-center border border-gray-700">
+        <button 
+            class="text-green-500 hover:text-green-700"
+            hx-post="{% url 'editar_produto_lead_apc' produto_lead.id %}"
+            hx-target="closest tr"
+            hx-include="closest tr"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'> 
+            <span class="material-symbols-outlined">edit</span>
+        </button>
+
+        <button 
+            class="text-red-500 hover:text-red-700"
+            hx-get="{% url 'deletar_produto_lead' produto_lead.id %}"
+            hx-target="closest tr"
+            hx-swap="outerHTML">
+            <span class="material-symbols-outlined">delete</span>
+        </button>
+    </td>
+</tr>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Icetar</title>
+    <!-- Ícones para Favicon e Apple Touch -->
+    <link rel="icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-100x100.png" sizes="32x32" />
+    <link rel="icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-300x300.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-300x300.png" />
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <!-- Parte esquerda (formulário) -->
+    <div class="left-container">
+        
+        <div class="form-container">
+            <img src="https://icetar.com.br/wp-content/uploads/2024/11/cropped-icetar-logo-small.png" alt="Logo" class="logo">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="username" placeholder="Usuário" required>
+                <input type="password" name="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Parte direita (imagem grande) -->
+    <div class="right-container"></div>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+<form method="POST" action="{% url 'edit_lead_finalizado' 1 lead.id %}">
+    {% csrf_token %}
+
+    <div class="mb-4">
+        <label class="text-white text-sm">Observações adicionais::</label>
+        <textarea name="comentario" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600"></textarea>
+    </div>
+
+    <button type="submit" class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
+        Finalizar Lead
+    </button>
+</form>

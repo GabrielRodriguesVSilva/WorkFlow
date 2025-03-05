@@ -1,0 +1,175 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+
+
+{% block title %}Icetar - APV{% endblock %}
+
+{% block content %}
+
+<div class="p-2">
+
+    <div class="flex items-center text-white text-2xl font-bold">
+        <a href="{% url 'apv' %}">
+            <span class="material-symbols-outlined text-2xl mr-2" translate="no">arrow_back_ios_new</span>
+        </a>
+        APV - Lead N° {{ lead.id }} - {{ lead.cliente.nome_fantasia|truncatechars:30 }}
+  
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-1">
+
+    {% include 'Main/includes/include_status.html' %}
+
+    <div class="mt-4 p-4 rounded-lg bg-gray-900">
+        <div class="flex justify-between items-center cursor-pointer toggle-section">
+            <h2 class="text-lg font-semibold text-white">Informações do Lead</h2>
+            <span class="material-symbols-outlined text-white">expand_less</span>
+        </div>
+        <div>
+            <hr class="border-t-2 border-white my-1">
+
+            <div class="grid grid-cols-4 gap-4 mt-4">
+                <div>
+                    <label class="text-white text-sm">Inscrição Estadual</label>
+                    <input type="text" value="{{ lead.cliente.instituicao|default:'Sem Inscrição estadual' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+                <div>
+                    <label class="text-white text-sm">Finalidade</label>
+                    <input type="text" value="{{ lead.get_finalidade_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+                {% if lead.responsavel %}
+                <div>
+                    <label class="text-white text-sm">Responsável</label>
+                    <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                        <img src="{% if lead.responsavel.perfil.foto %}{{ lead.responsavel.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}" alt="Foto do Responsável" class="w-8 h-8 rounded-full">
+                        <span class="text-white">{{ lead.responsavel.username }}</span>
+                    </div>
+                </div>
+                {% endif %}  
+            </div>
+
+            <h3 class="text-lg font-semibold text-white mt-6">Localização do Cliente</h3>
+            <div class="grid grid-cols-4 gap-4 mt-2">
+                <div>
+                    <label class="text-white text-sm">Endereço</label>
+                    <input type="text" value="{{ lead.cliente.logradouro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+                <div>
+                    <label class="text-white text-sm">Bairro</label>
+                    <input type="text" value="{{ lead.cliente.bairro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+                <div>
+                    <label class="text-white text-sm">Cidade</label>
+                    <input type="text" value="{{ lead.cliente.cidade }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+                <div>
+                    <label class="text-white text-sm">CEP</label>
+                    <input type="text" value="{{ lead.cliente.cep }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="mt-4 p-4 rounded-lg bg-gray-900 shadow-lg">
+            <div class="flex justify-between items-center cursor-pointer toggle-section">
+                <h2 class="text-lg font-semibold text-white">Orçamento do Lead</h2>
+            </div>
+
+            <hr class="border-t-2 border-white my-2">
+
+            <table class="w-full mt-4 border-collapse bg-gray-900 text-white rounded-lg shadow-lg">
+                <thead>
+                    <tr class="bg-gray-800 text-white">
+                        <th class="p-2 border border-gray-700">Código</th>
+                        <th class="p-2 border border-gray-700">Descrição</th>
+                        <th class="p-2 border border-gray-700">Qnt</th>
+                        <th class="p-2 border border-gray-700">Prazo</th>
+                        <th class="p-2 border border-gray-700">Val</th>
+                        <th class="p-2 border border-gray-700">Custo</th>
+                        <th class="p-2 border border-gray-700">Preço Cal.</th>
+                        <th class="p-2 border border-gray-700">Preço</th>
+                        <th class="p-2 border border-gray-700">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="produto-list">
+                    {% for produto_lead in produtos_lead %}
+                    <tr class="border border-gray-700">
+                        <td class="p-2 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
+                        <td class="p-2 border border-gray-700">
+                            {{ produto_lead.produto.descricao|safe|truncatechars:25 }}
+                        </td>                        
+                        <td class="p-2 border border-gray-700">{{ produto_lead.quantidade }}</td>
+                        <td class="p-2 border border-gray-700">{{ produto_lead.prazo }}</td>
+                        <td class="p-2 border border-gray-700">{{ produto_lead.validade }}</td>
+                        <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto.custo_unitario|floatformat:2 }}</td>
+                        <td class="p-2 border border-gray-700">R$ 0,00</td>
+                        
+                        <!-- Campo editável - Custo -->
+                        <td class="p-2 border border-gray-700">
+                            R$ 
+                            <input type="text" 
+                                name="valor_unitario" 
+                                value="{{ produto_lead.valor_unitario|default:0|floatformat:2 }}" 
+                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center"
+                                pattern="[0-9]+([.,][0-9]+)?" required>
+                        </td>
+
+                        <!-- Botão de Salvar -->
+                        <td class="p-2 text-center border border-gray-700">
+                            <button 
+                                class="text-green-500 hover:text-green-700"
+                                hx-post="{% url 'editar_produto_lead_apv' produto_lead.id %}"
+                                hx-target="closest tr"
+                                hx-include="closest tr"
+                                hx-swap="outerHTML"
+                                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'> 
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <form method="POST" action="{% url 'edit_lead_apv' lead.id %}">
+                {% csrf_token %}
+                <div class="mb-4 mt-4">
+                    <label class="text-white text-sm">Informações para Vendas:</label>
+                    <textarea name="apv_analise" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600"></textarea>
+                </div>
+    
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Enviar Orçamento
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".toggle-section").forEach(function (toggleBtn) {
+            let content = toggleBtn.nextElementSibling; 
+            let icon = toggleBtn.querySelector("span");
+
+            // Garante que a seção esteja minimizada ao carregar
+            content.classList.add("hidden");
+            icon.textContent = "expand_more";
+
+            toggleBtn.addEventListener("click", function () {
+                if (content.classList.contains("hidden")) {
+                    content.classList.remove("hidden");
+                    icon.textContent = "expand_less"; 
+                } else {
+                    content.classList.add("hidden");
+                    icon.textContent = "expand_more"; 
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

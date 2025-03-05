@@ -1,0 +1,70 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+
+
+{% block title %}Icetar - APC{% endblock %}
+
+{% block content %}
+
+<div class="p-2">
+
+    <!-- Título com Ícone -->
+    <div class="flex items-center text-white text-2xl font-bold">
+        
+        <span class="material-symbols-outlined text-2xl mr-2" translate="no">shopping_cart</span>
+        APC - Apuramento Proposta de Compras
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-1">
+
+    <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
+        <table class="w-full border border-gray-700 text-white">
+            <thead>
+                <tr class="bg-gray-800">
+                    <th class="p-2 border border-gray-700">N° Lead</th>
+                    <th class="p-2 border border-gray-700">Cliente</th>
+                    <th class="p-2 border border-gray-700">Data APC</th>
+                    <th class="p-2 border border-gray-700">Qnt Itens</th>
+                    <th class="p-2 border border-gray-700">Situação</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white text-gray-700">
+                {% for lead in leads_em_apc %}
+                <tr class="border border-gray-700 cursor-pointer transition duration-200 hover:bg-gray-800 hover:text-white"
+                    onclick="window.location.href='{% url 'apc_lead' lead.id %}'">
+            
+     
+                    <td class="p-2 text-center border border-gray-700">{{ lead.id }}</td>
+                    <td class="p-2 border border-gray-700">{{ lead.cliente.nome_fantasia }}</td>
+                    <td class="p-2 border border-gray-700">{{ lead.atendimento_em|date:"d/m/Y H:i" }}</td>
+                    <td class="p-2 text-center border border-gray-700">{{ lead.qnt_itens }}</td>
+                    <td class="p-2 text-center border border-gray-700">
+                        {% if lead.status_apc == 0 %}
+                            <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded-full">
+                                Não Cotado
+                            </span>
+                        {% elif lead.status_apc == 1 %}
+                            <span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-200 rounded-full">
+                                Aguardando Retorno
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">
+                                Finalizado
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-2 text-center text-gray-400">Nenhum lead em APC no momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+
+{% endblock %}

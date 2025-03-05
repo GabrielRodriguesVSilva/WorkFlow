@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Icetar - Workflow{% endblock %}</title>
+    <link rel="icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-100x100.png" sizes="32x32" />
+    <link rel="icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-300x300.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="https://icetar.com.br/wp-content/uploads/2024/11/icetar-500x500-1-300x300.png" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.5"></script>
+    
+
+    <!-- <script src="{% static 'js/htmx/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/htmx/debug.js' %}" defer></script> -->
+
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <style>
+        /* Cor personalizada */
+        .bg-primary {
+            background-color: #0F62AC;
+        }
+        .icon {
+            font-size: 24px;
+            color: #e3e3e3;
+        }
+        /* Estilização do fundo com opacidade */
+        .main-container {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .main-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("{% static 'image/background.jpg' %}") no-repeat center center/cover;
+            /* opacity: 0.3; */
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="flex">
+
+<!-- Navbar lateral -->
+<aside class="bg-primary text-white w-64 h-screen flex flex-col">
+    <!-- Logo no topo -->
+    <div class="p-4 flex justify-center">
+        <img src="https://icetar.com.br/wp-content/uploads/2024/11/cropped-icetar-logo-small.png" 
+             alt="Logo" 
+             class="w-32 bg-white p-2 rounded-xl shadow-md">
+    </div>
+
+    <!-- Título estilizado -->
+    <h1 class="text-xl font-extrabold text-center uppercase tracking-wider mt-1 mr-2 ml-2 bg-sky-400 text-primary p-2 rounded-md shadow-md" translate="no">
+        Icetar Workflow
+    </h1>
+
+    <!-- Perfil do usuário -->
+    <div class="flex flex-col items-center mt-4">
+        <img src="{% if user.perfil.foto %}{{ user.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}"
+        alt="Foto do usuário" 
+        class="w-20 h-20 rounded-full border-4 border-white shadow-lg object-cover">
+   
+
+        <p class="mt-2 text-lg font-semibold">{{ user.username }}</p>
+        <span class="text-sm text-gray-300">{{ user.email }}</span>
+    </div>
+
+    <!-- Menu de navegação -->
+    <nav class="flex flex-col mt-6">
+        <a href="{% url 'home' %}" class="flex items-center p-3 hover:bg-sky-400">
+            <span class="material-symbols-outlined icon mr-3" translate="no">home</span> Home
+        </a>
+        <a href="{% url 'fluxo' %}" class="flex items-center p-3 hover:bg-sky-400">
+            <span class="material-symbols-outlined icon mr-3" translate="no">sync_alt</span> Fluxo
+        </a>
+        <a href="{% url 'usuarios' %}" class="flex items-center p-3 hover:bg-sky-400">
+            <span class="material-symbols-outlined icon mr-3" translate="no">group</span> Usuários
+        </a>
+
+        <!-- Menu de Compras com Sub-itens -->
+        <div class="relative group">
+            <button class="flex items-center p-3 w-full hover:bg-sky-400">
+                <span class="material-symbols-outlined icon mr-3" translate="no">shopping_cart</span> Compras
+                <span class="ml-auto material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="hidden absolute left-0 w-full bg-gray-800 rounded-lg shadow-lg group-hover:block">
+                <a href="{% url 'apc' %}" class="block px-4 py-2 hover:bg-sky-400">APC</a>
+                <a href="{% url 'apv' %}" class="block px-4 py-2 hover:bg-sky-400">APV</a>
+            </div>
+        </div>
+
+        <a href="{% url 'logout' %}" class="flex items-center p-3 hover:bg-sky-400">
+            <span class="material-symbols-outlined icon mr-3" translate="no">logout</span> Sair
+        </a>
+    </nav>
+
+</aside>
+
+<div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 space-y-2 w-full max-w-md"></div>
+
+<!-- Conteúdo principal com fundo dinâmico -->
+<main class="flex-1 h-screen flex flex-col overflow-hidden p-4 relative main-container">
+    {% block content %}
+    <!-- O conteúdo de cada página será carregado aqui -->
+    {% endblock %}
+</main>
+
+<!-- Modal de Mensagem Temporário -->
+
+
+
+<script>
+    function showToast(message, type = "success") {
+        const colors = {
+            success: "bg-green-500",
+            error: "bg-red-500",
+            warning: "bg-yellow-500",
+            info: "bg-blue-500"
+        };
+
+        const toast = document.createElement("div");
+        toast.className = `px-4 py-2 text-white rounded shadow-md ${colors[type]}`;
+        toast.innerText = message;
+
+        document.getElementById("toast-container").appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("opacity-0", "transition-opacity", "duration-500");
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    // Exibir mensagens do Django automaticamente
+    document.addEventListener("DOMContentLoaded", () => {
+        {% for message in messages %}
+            showToast("{{ message }}", "{{ message.tags }}");
+        {% endfor %}
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends 'base_main.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Icetar - Usuários{% endblock %}
+
+{% block content %}
+
+<div class="p-2">
+
+    <!-- Título com Ícone -->
+    <div class="flex items-center text-white text-2xl font-bold">
+        <span class="material-symbols-outlined text-2xl mr-2" translate="no">group</span>
+        Gerenciamento de Usuários
+    </div>
+
+    <!-- Linha divisória -->
+    <hr class="border-t-2 border-white my-1">
+
+    <!-- Botão de Cadastrar Novo Usuário -->
+    <div class="flex justify-between items-center my-4">
+        <a href="{% url 'add_user' %}" class="flex items-center text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg">
+            <span class="material-symbols-outlined mr-2">person_add</span>
+            Cadastrar Novo Usuário
+        </a>
+    </div>
+
+    <!-- Tabela de Usuários -->
+    <table class="min-w-full bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <thead>
+            <tr>
+                <th class="py-2 px-4 text-left text-white">Foto</th>
+                <th class="py-2 px-4 text-left text-white">Username</th>
+                <th class="py-2 px-4 text-left text-white">Primeiro Nome</th>
+                <th class="py-2 px-4 text-left text-white">Sobrenome</th>
+                <th class="py-2 px-4 text-left text-white">E-mail</th>
+                <th class="py-2 px-4 text-left text-white">Data de Cadastro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="bg-gray-700 hover:bg-gray-600 cursor-pointer" onclick="window.location.href='{% url 'edit_user' user.id %}'">
+                <td class="py-2 px-4">
+                    {% if user.perfil.foto %}
+                        <img src="{{ user.perfil.foto.url }}" alt="{{ user.username }}" class="w-12 h-12 rounded-full object-cover">
+                    {% else %}
+                        <span class="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center text-white">A</span>
+                    {% endif %}
+                </td>
+                <td class="py-2 px-4 text-white">{{ user.username }}</td>
+                <td class="py-2 px-4 text-white">{{ user.first_name }}</td>
+                <td class="py-2 px-4 text-white">{{ user.last_name }}</td>
+                <td class="py-2 px-4 text-white">{{ user.email }}</td>
+                <td class="py-2 px-4 text-white">{{ user.date_joined|date:"d/m/Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="py-4 px-4 text-center text-white">Nenhum usuário encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}
