@@ -208,11 +208,12 @@ def buscar_infos_do_orcamento(orcamento_id):
         "call": "ConsultarPedido",
         "app_key": OMIE_APP_KEY,
         "app_secret": OMIE_APP_SECRET,
-        "param": [{"numero_pedido": orcamento_id}]
+        "param": [{"numero_pedido": int(orcamento_id)}]
     })
 
     headers = {'Content-Type': 'application/json'}
     response = requests.post(OMIE_URL_PEDIDO, headers=headers, data=payload)
+    print(response.status_code)
     if response.status_code == 200:
         omie_data = response.json()
         return omie_data

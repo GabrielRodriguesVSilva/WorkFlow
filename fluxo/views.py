@@ -41,7 +41,7 @@ def is_allowed_to_view_apv(user):
     return user.has_perm('fluxo.pode_modificar_apv') or user.is_superuser
 
 def is_allowed_to_view_usuarios(user):
-    return user.has_perm('perfil.gerencia_usuario') or user.is_superuser
+    return user.has_perm('fluxo.gerencia_usuario') or user.is_superuser
 
 
 def login_view(request):
@@ -193,12 +193,10 @@ def buscar_clientes(request):
 
     if not cliente:
         cliente_omie = add_cliente_da_omie(cnpj)
-        print(cliente_omie)
         if not cliente_omie:
             return render(request, 'Main/Fluxo/Includes/msg_cliente_nao_encontrado.html', {"messages": "Cliente não encontrado na Omie!"})
 
         cliente = cliente_omie  # Cliente vindo da Omie
-        print(cliente.id)
 
     # Contexto incluindo os choices do modelo Lead
     context = {
@@ -369,7 +367,6 @@ def buscar_produto(request, lead_id):
 
     # Busca ou cria o produto no banco
     produto_data = add_produto_da_omie(codigo_produto)
-    print(produto_data)
     if not produto_data:
         messages.error(request, "Produto não encontrado na Omie!")
         return render(request, 'Main/Includes/htmx_messages.html')
@@ -426,7 +423,8 @@ def edit_lead_atendimento(request, lead_id):
     if lead_:
         orcamento_omie = request.POST.get('orcamento_omie')
         if orcamento_omie:
-            orc_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
+            orc_omie = buscar_infos_do_orcamento(orcamento_omie)
+            print(orc_omie)
             if not orc_omie:
                 messages.error(request, "Orçamento do Omie Não Encontrado!")
                 return redirect('lead', lead_id)

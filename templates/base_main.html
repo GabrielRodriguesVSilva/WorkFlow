@@ -120,7 +120,7 @@
                 <span class="ml-2 sidebar-text" translate="no">APV</span>
             </a>
         {% endif %}
-        {% if perms.perfil.gerencia_usuario or request.user.is_superuser %}
+        {% if perms.fluxo.gerencia_usuario or request.user.is_superuser %}
         <a href="{% url 'usuarios' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
             <span class="material-symbols-outlined text-lg" translate="no">group</span> 
             <span class="ml-2 sidebar-text">Usuários</span>
