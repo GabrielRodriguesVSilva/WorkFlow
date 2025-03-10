@@ -1,51 +1,77 @@
-<div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
-    <div class="mt-4 p-4 rounded-lg bg-gray-900">
-        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+<div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-4 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
+    <div class="p-6 rounded-lg bg-gray-900">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
 
-            <!-- Nome de Usuário -->
-            <div class="flex flex-col">
-                <label for="username" class="text-white mb-2">Nome de Usuário</label>
-                <input type="text" id="username" name="username" value="{{ user_edit.username }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            <!-- Foto de Perfil e Upload + Username e Senha -->
+            <div class="flex items-center space-x-6">
+                <!-- Foto de Perfil -->
+                <div class="relative w-24 h-24">
+                    {% if user_edit.perfil.foto %}
+                        <img src="{{ user_edit.perfil.foto.url }}" alt="Foto de Perfil" class="w-24 h-24 rounded-full object-cover border-2 border-gray-600">
+                    {% else %}
+                        <div class="w-24 h-24 flex items-center justify-center rounded-full border-2 border-gray-600 bg-gray-700 text-white text-3xl font-bold">
+                            {{ user_edit.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    <label for="foto" class="absolute bottom-0 right-0 bg-gray-800 text-white p-1 rounded-full cursor-pointer hover:bg-gray-700">
+                        <span class="material-symbols-outlined text-lg">photo_camera</span>
+                    </label>
+                    <input type="file" id="foto" name="foto" class="hidden">
+                </div>
+                
+                <!-- Nome de Usuário e Senha -->
+                <div class="flex w-full space-x-4">
+                    <!-- Nome de Usuário -->
+                    <div class="relative w-1/2">
+                        <label for="username" class="text-white mb-2">Username</label>
+                        <input type="text" id="username" name="username" value="{{ user_edit.username }}" placeholder="Username"
+                               class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white w-full" required>
+                    </div>
+                    
+                    <!-- Senha -->
+                    <div class="relative w-1/2">
+                        <label for="password" class="text-white mb-2">Senha</label>
+                        <input type="password" id="password" name="password"  placeholder="Senha"
+                               class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white w-full">
+                    </div>
+                </div>
             </div>
 
-            <!-- Primeiro Nome -->
-            <div class="flex flex-col">
-                <label for="first_name" class="text-white mb-2">Primeiro Nome</label>
-                <input type="text" id="first_name" name="first_name" value="{{ user_edit.first_name }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
-            </div>
-
-            <!-- Sobrenome -->
-            <div class="flex flex-col">
-                <label for="last_name" class="text-white mb-2">Sobrenome</label>
-                <input type="text" id="last_name" name="last_name" value="{{ user_edit.last_name }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+            <!-- Primeiro Nome e Sobrenome -->
+            <div class="flex space-x-4">
+                <div class="flex flex-col w-1/2">
+                    <label for="first_name" class="text-white mb-2">Primeiro Nome</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user_edit.first_name }}" placeholder="Primeiro Nome"
+                           class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+                </div>
+                <div class="flex flex-col w-1/2">
+                    <label for="last_name" class="text-white mb-2">Sobrenome</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user_edit.last_name }}" placeholder="Sobrenome"
+                           class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+                </div>
             </div>
 
             <!-- E-mail -->
             <div class="flex flex-col">
                 <label for="email" class="text-white mb-2">E-mail</label>
-                <input type="email" id="email" name="email" value="{{ user_edit.email }}" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+                <input type="email" id="email" name="email" value="{{ user_edit.email }}" placeholder="E-mail"
+                       class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
             </div>
 
-            <!-- Senha (opcional) -->
+            <!-- Grupo do Usuário -->
             <div class="flex flex-col">
-                <label for="password" class="text-white mb-2">Senha</label>
-                <input type="password" id="password" name="password" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white">
+                <label for="grupo" class="text-white mb-2">Cargo</label>
+                <select id="grupo" name="grupo" 
+                        class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white">
+                    {% for grupo in grupos %}
+                        <option value="{{ grupo.id }}" {% if grupo_atual and grupo_atual.id == grupo.id %}selected{% endif %}>
+                            {{ grupo.name }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <!-- Foto de Perfil -->
-            <div class="flex flex-col">
-                <label for="foto" class="text-white mb-2">Foto de Perfil</label>
-                <input type="file" id="foto" name="foto" class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white">
-                
-                {% if user_edit.perfil.foto %}
-                    <!-- Exibe a foto atual -->
-                    <div class="mt-2">
-                        <label class="text-white">Foto atual:</label>
-                        <img src="{{ user_edit.perfil.foto.url }}" alt="Foto de Perfil" class="w-20 h-20 rounded-full object-cover mt-2">
-                    </div>
-                {% endif %}
-            </div>
 
             <!-- Botão de Submissão -->
             <div class="flex justify-end">

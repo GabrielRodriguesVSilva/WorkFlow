@@ -129,7 +129,19 @@ class Lead(models.Model):
     motivo_recusa = models.CharField(max_length=50, choices=MOTIVO_RECUSE_CHOICES, blank=True, null=True)
 
 
-    
+    class Meta:
+        permissions = [
+            ("pode_ver_fluxo", "Pode visualizar o fluxo de Leads"),
+            ("pode_modificar_analise", "Pode modificar Leads no status Análise"),
+            ("pode_modificar_atendimento", "Pode modificar Leads no status Atendimento"),
+            ("pode_modificar_apc", "Pode modificar Leads no status APC"),
+            ("pode_modificar_apv", "Pode modificar Leads no status APV"),
+            ("pode_modificar_orcamento", "Pode modificar Leads no status Orçamento"),
+            ("pode_modificar_followup", "Pode modificar Leads no status Follow-up"),
+            ("pode_ver_todos_leads", "Pode ver todos os Leads"),
+            ("pode_declinar_lead", "Pode declinar Leads"),
+            ("pode_excluir_lead", "Pode excluir Leads"),
+        ]
 
 
     def __str__(self):

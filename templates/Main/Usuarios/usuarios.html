@@ -31,6 +31,7 @@
             <tr>
                 <th class="py-2 px-4 text-left text-white">Foto</th>
                 <th class="py-2 px-4 text-left text-white">Username</th>
+                <th class="py-2 px-4 text-left text-white">Cargo</th>
                 <th class="py-2 px-4 text-left text-white">Primeiro Nome</th>
                 <th class="py-2 px-4 text-left text-white">Sobrenome</th>
                 <th class="py-2 px-4 text-left text-white">E-mail</th>
@@ -44,10 +45,11 @@
                     {% if user.perfil.foto %}
                         <img src="{{ user.perfil.foto.url }}" alt="{{ user.username }}" class="w-12 h-12 rounded-full object-cover">
                     {% else %}
-                        <span class="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center text-white">A</span>
+                        <span class="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center text-white">{{ user.username|first|upper }}</span>
                     {% endif %}
                 </td>
                 <td class="py-2 px-4 text-white">{{ user.username }}</td>
+                <td class="py-2 px-4 text-white">{{ user.groups.first.name|default:"Nenhum" }}</td>
                 <td class="py-2 px-4 text-white">{{ user.first_name }}</td>
                 <td class="py-2 px-4 text-white">{{ user.last_name }}</td>
                 <td class="py-2 px-4 text-white">{{ user.email }}</td>

@@ -52,61 +52,158 @@
 </head>
 <body class="flex">
 
-<!-- Navbar lateral -->
-<aside class="bg-primary text-white w-64 h-screen flex flex-col">
-    <!-- Logo no topo -->
+<aside id="sidebar" class="bg-primary text-white w-48 h-screen flex flex-col shadow-xl transition-all duration-300">
+    <!-- Botão para minimizar/expandir -->
+    <button onclick="toggleSidebar()" class="p-2 self-end text-white hover:bg-gray-700 transition rounded-lg m-2">
+        <span id="menu-icon" class="material-symbols-outlined" translate="no">arrow_menu_close</span>
+    </button>
+
     <div class="p-4 flex justify-center">
         <img src="https://icetar.com.br/wp-content/uploads/2024/11/cropped-icetar-logo-small.png" 
-             alt="Logo" 
-             class="w-32 bg-white p-2 rounded-xl shadow-md">
+            alt="Logo" 
+            class="w-20 bg-white p-1 rounded-lg shadow-md">
     </div>
 
-    <!-- Título estilizado -->
-    <h1 class="text-xl font-extrabold text-center uppercase tracking-wider mt-1 mr-2 ml-2 bg-sky-400 text-primary p-2 rounded-md shadow-md" translate="no">
-        Icetar Workflow
-    </h1>
+    <div class="flex justify-center mt-2">
+        <h1 id="workflow-title" class="text-base font-semibold text-center uppercase tracking-wide bg-gradient-to-r from-gray-700 to-gray-900 text-primary p-2 rounded-lg shadow-md transition-all" translate="no">
+            Workflow
+        </h1>
+    </div>
 
-    <!-- Perfil do usuário -->
     <div class="flex flex-col items-center mt-4">
-        <img src="{% if user.perfil.foto %}{{ user.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}"
-        alt="Foto do usuário" 
-        class="w-20 h-20 rounded-full border-4 border-white shadow-lg object-cover">
-   
-
-        <p class="mt-2 text-lg font-semibold">{{ user.username }}</p>
-        <span class="text-sm text-gray-300">{{ user.email }}</span>
+        {% if user.perfil.foto %}
+            <img id="user-photo" src="{{ user.perfil.foto.url }}" alt="Foto do usuário" 
+                class="w-14 h-14 rounded-full border-2 border-white shadow-md object-cover transition-all">
+        {% else %}
+            <span id="user-photo" class="w-14 h-14 rounded-full bg-gray-500 text-white text-lg flex items-center justify-center transition-all">
+                {{ user.username|first|upper }}
+            </span>
+        {% endif %}
+        <p id="user-name" class="mt-1 text-sm font-medium transition-all">{{ user.username }}</p>
+        <span id="user-email" class="text-xs text-gray-300 transition-all">{{ user.email }}</span>
     </div>
 
-    <!-- Menu de navegação -->
-    <nav class="flex flex-col mt-6">
-        <a href="{% url 'home' %}" class="flex items-center p-3 hover:bg-sky-400">
-            <span class="material-symbols-outlined icon mr-3" translate="no">home</span> Home
+    <!-- Navegação -->
+    <nav class="mt-4 space-y-1 flex-1">
+        <a href="{% url 'home' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
+            <span class="material-symbols-outlined text-lg" translate="no">home</span> 
+            <span class="ml-2 sidebar-text" translate="no">Home</span>
         </a>
-        <a href="{% url 'fluxo' %}" class="flex items-center p-3 hover:bg-sky-400">
-            <span class="material-symbols-outlined icon mr-3" translate="no">sync_alt</span> Fluxo
-        </a>
-        <a href="{% url 'usuarios' %}" class="flex items-center p-3 hover:bg-sky-400">
-            <span class="material-symbols-outlined icon mr-3" translate="no">group</span> Usuários
+        {% if perms.fluxo.pode_ver_fluxo or request.user.is_superuser %}
+            <a href="{% url 'fluxo' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
+                <span class="material-symbols-outlined text-lg" translate="no">sync_alt</span> 
+                <span class="ml-2 sidebar-text">Fluxo</span>
+            </a>
+        {% endif %}
+        {% if perms.fluxo.pode_modificar_apc or request.user.is_superuser %}
+            <a href="{% url 'apc' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
+                <span class="material-symbols-outlined text-lg" translate="no">shopping_cart</span> 
+                <span class="ml-2 sidebar-text">APC</span>
+            </a>
+        {% endif %}
+        {% if perms.fluxo.pode_modificar_apv or request.user.is_superuser %}
+            <a href="{% url 'apv' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
+                <span class="material-symbols-outlined text-lg" translate="no">attach_money</span> 
+                <span class="ml-2 sidebar-text" translate="no">APV</span>
+            </a>
+        {% endif %}
+        
+        <a href="{% url 'usuarios' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
+            <span class="material-symbols-outlined text-lg" translate="no">group</span> 
+            <span class="ml-2 sidebar-text">Usuários</span>
         </a>
 
-        <!-- Menu de Compras com Sub-itens -->
-        <div class="relative group">
-            <button class="flex items-center p-3 w-full hover:bg-sky-400">
-                <span class="material-symbols-outlined icon mr-3" translate="no">shopping_cart</span> Compras
-                <span class="ml-auto material-symbols-outlined">expand_more</span>
-            </button>
-            <div class="hidden absolute left-0 w-full bg-gray-800 rounded-lg shadow-lg group-hover:block">
-                <a href="{% url 'apc' %}" class="block px-4 py-2 hover:bg-sky-400">APC</a>
-                <a href="{% url 'apv' %}" class="block px-4 py-2 hover:bg-sky-400">APV</a>
-            </div>
-        </div>
-
-        <a href="{% url 'logout' %}" class="flex items-center p-3 hover:bg-sky-400">
-            <span class="material-symbols-outlined icon mr-3" translate="no">logout</span> Sair
-        </a>
     </nav>
 
+    <!-- Final da Sidebar -->
+    <div class="mt-auto">
+        <a href="{% url 'logout' %}" class="flex items-center p-3 hover:bg-red-500 hover:text-white transition-all duration-300 rounded-lg">
+            <span class="material-symbols-outlined text-lg" translate="no">logout</span> 
+            <span class="ml-2 sidebar-text" translate="no">Sair</span>
+        </a>
+
+        <p id="version-text" class="text-center text-xs text-gray-400 m-2" translate="no">
+            Icetar Workflow © V 0.0.1
+        </p>
+    </div>
 </aside>
+    
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const sidebarTexts = document.querySelectorAll(".sidebar-text");
+        const workflowTitle = document.getElementById("workflow-title");
+        const userName = document.getElementById("user-name");
+        const userEmail = document.getElementById("user-email");
+        const versionText = document.getElementById("version-text");
+        const sidebarIcons = document.querySelectorAll(".material-symbols-outlined");
+        const userPhoto = document.getElementById("user-photo");
+        const menuIcon = document.getElementById("menu-icon");
+
+        // Alternar entre expandir e minimizar a sidebar
+        sidebar.classList.toggle("w-48");
+        sidebar.classList.toggle("w-16");
+
+        // Salvar o estado da sidebar no localStorage
+        if (sidebar.classList.contains("w-16")) {
+            localStorage.setItem("sidebarState", "closed");
+        } else {
+            localStorage.setItem("sidebarState", "open");
+        }
+
+        // Atualizar ícones e visibilidade conforme o estado
+        updateSidebarState();
+    }
+
+    // Função para atualizar o estado da sidebar ao carregar a página
+    function updateSidebarState() {
+        const sidebar = document.getElementById("sidebar");
+        const sidebarTexts = document.querySelectorAll(".sidebar-text");
+        const workflowTitle = document.getElementById("workflow-title");
+        const userName = document.getElementById("user-name");
+        const userEmail = document.getElementById("user-email");
+        const versionText = document.getElementById("version-text");
+        const sidebarIcons = document.querySelectorAll(".material-symbols-outlined");
+        const userPhoto = document.getElementById("user-photo");
+        const menuIcon = document.getElementById("menu-icon");
+
+        // Verificar o estado da sidebar no localStorage e aplicar
+        const sidebarState = localStorage.getItem("sidebarState");
+        if (sidebarState === "closed") {
+            sidebar.classList.add("w-16");
+            sidebar.classList.remove("w-48");
+
+            sidebarTexts.forEach(text => text.classList.add("hidden"));
+            workflowTitle.classList.add("hidden");
+            userName.classList.add("hidden");
+            userEmail.classList.add("hidden");
+            versionText.classList.add("hidden");
+            
+            sidebarIcons.forEach(icon => icon.classList.add("mx-auto"));
+            userPhoto.classList.add("w-10", "h-10");
+            menuIcon.textContent = 'arrow_menu_open';
+        } else {
+            sidebar.classList.add("w-48");
+            sidebar.classList.remove("w-16");
+
+            sidebarTexts.forEach(text => text.classList.remove("hidden"));
+            workflowTitle.classList.remove("hidden");
+            userName.classList.remove("hidden");
+            userEmail.classList.remove("hidden");
+            versionText.classList.remove("hidden");
+            
+            sidebarIcons.forEach(icon => icon.classList.remove("mx-auto"));
+            userPhoto.classList.remove("w-10", "h-10");
+            menuIcon.textContent = 'arrow_menu_close';
+        }
+    }
+
+    // Chamar a função de atualização do estado assim que a página for carregada
+    window.onload = updateSidebarState;
+</script>
+    
+    
+
 
 <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 space-y-2 w-full max-w-md"></div>
 

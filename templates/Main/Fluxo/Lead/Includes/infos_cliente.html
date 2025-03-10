@@ -1,0 +1,68 @@
+{% load static %}
+
+<div class="flex justify-between items-center cursor-pointer toggle-section">
+    <h2 class="text-lg font-semibold text-white">Informações do Cliente</h2>
+    <span class="material-symbols-outlined text-white">expand_less</span>
+</div>
+<div>
+    <hr class="border-t-2 border-white my-1">
+
+    <div>
+        <label class="text-white text-sm">Empresa</label>
+        <input type="text" value="{{ lead.cliente.empresa }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 mt-4">
+        <div>
+            <label class="text-white text-sm">Nome Fantasia</label>
+            <input type="text" value="{{ lead.cliente.nome_fantasia }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">CNPJ</label>
+            <input type="text" value="{{ lead.cliente.documento }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Contato</label>
+            <input type="text" value="{{ lead.cliente.nome_contato }} - {{ lead.cliente.telefone }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-4 gap-4 mt-4">
+        <div>
+            <label class="text-white text-sm">Email</label>
+            <input type="text" value="{{ lead.cliente.email }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Inscrição Estadual</label>
+            <input type="text" value="{{ lead.cliente.instituicao|default:'Sem Inscrição estadual' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Contribuinte</label>
+            <input type="text" value="{{ lead.cliente.contribuinte }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Finalidade</label>
+            <input type="text" value="{{ lead.get_finalidade_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+    </div>
+
+    <h3 class="text-lg font-semibold text-white mt-6">Localização</h3>
+    <div class="grid grid-cols-4 gap-4 mt-2">
+        <div>
+            <label class="text-white text-sm">Endereço</label>
+            <input type="text" value="{{ lead.cliente.logradouro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Bairro</label>
+            <input type="text" value="{{ lead.cliente.bairro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Cidade</label>
+            <input type="text" value="{{ lead.cliente.cidade }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">CEP</label>
+            <input type="text" value="{{ lead.cliente.cep }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+    </div>
+</div>

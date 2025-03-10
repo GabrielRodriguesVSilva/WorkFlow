@@ -104,7 +104,7 @@
                         <td class="p-2 border border-gray-700">{{ produto_lead.prazo }}</td>
                         <td class="p-2 border border-gray-700">{{ produto_lead.validade }}</td>
                         <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto.custo_unitario|floatformat:2 }}</td>
-                        <td class="p-2 border border-gray-700">R$ 0,00</td>
+                        <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto|calcular_preco  }}</td>
                         
                         <!-- Campo editável - Custo -->
                         <td class="p-2 border border-gray-700">

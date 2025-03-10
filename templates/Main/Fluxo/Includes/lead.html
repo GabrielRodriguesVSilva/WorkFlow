@@ -1,13 +1,33 @@
 {% load static %}
 <a href="{% url 'lead' lead.id %}" class="block bg-gray-700 p-4 rounded-lg shadow mb-2 transition-all duration-300 hover:bg-gray-600">
-    <strong>N°: {{lead.id }}</strong> 
+    <strong>N°: {{ lead.id }}</strong> 
     <p>{{ lead.cliente.nome_fantasia }}</p>
 
     <div class="flex items-center justify-between mt-2">
-        <span class="text-sm text-gray-400">Tk: R$ {{ lead.ticket|floatformat:2 }}</span>
-        <img src="{% if lead.criador.perfil.foto %}{{ lead.criador.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}"
-             alt="Foto do responsável" 
-             class="rounded-full border-2 border-white shadow max-w-[32px] max-h-[32px] object-cover">
+        {% if lead.status <= 1 %}
+            <span class="text-sm text-gray-400">Tk: R$ {{ lead.ticket|floatformat:2 }}</span>
+        {% else %}
+            <span class="text-sm text-gray-400">Valor: R$ {{ lead.valor|floatformat:2 }}</span>
+        {% endif %}
+
+        {% if lead.status == 0 %}
+            {% if lead.criador.perfil.foto %}
+                <img src="{{ lead.criador.perfil.foto.url }}" alt="Foto do responsável" 
+                     class="rounded-full border-2 border-white shadow max-w-[32px] max-h-[32px] object-cover">
+            {% else %}
+                <span class="rounded-full bg-gray-500 text-white text-xs flex items-center justify-center w-[32px] h-[32px]">
+                    {{ lead.criador.username|first|upper }}
+                </span>
+            {% endif %}
+        {% else %}
+            {% if lead.responsavel.perfil.foto %}
+                <img src="{{ lead.responsavel.perfil.foto.url }}" alt="Foto do responsável" 
+                     class="rounded-full border-2 border-white shadow max-w-[32px] max-h-[32px] object-cover">
+            {% else %}
+                <span class="rounded-full bg-gray-500 text-white text-xs flex items-center justify-center w-[32px] h-[32px]">
+                    {{ lead.responsavel.username|first|upper }}
+                </span>
+            {% endif %}
+        {% endif %}
     </div>
 </a>
-

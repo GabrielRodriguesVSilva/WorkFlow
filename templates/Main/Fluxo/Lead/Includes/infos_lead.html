@@ -1,0 +1,78 @@
+{% load static %}
+
+<div class="flex justify-between items-center cursor-pointer toggle-section">
+    <h2 class="text-lg font-semibold text-white">Informações do Lead</h2>
+    <span class="material-symbols-outlined text-white">expand_less</span>
+</div>
+<div>
+    <hr class="border-t-2 border-white my-1">
+    
+    <div class="grid grid-cols-4 gap-4">
+        <div>
+            <label class="text-white text-sm">Tipo</label>
+            <input type="text" value="{{ lead.get_tipo_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Origem</label>
+            <input type="text" value="{{ lead.get_origem_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Temperatura</label>
+            <input type="text" value="{{ lead.get_temperatura_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Ticket</label>
+            <input type="text" value="R$ {{ lead.ticket|floatformat:2 }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <label class="text-white text-sm">Solicitação</label>
+        <textarea class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600 min-h-[100px]" readonly>{{ lead.solicitacao }}</textarea>
+    </div>
+
+    <div class="grid grid-cols-4 gap-4 mt-4">
+        <div>
+            <label class="text-white text-sm">Cliente Final</label>
+            <input type="text" value="{{ lead.cliente_final|default:'Sem Cliente Final' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Data da Criação</label>
+            <input type="text" value="{{ lead.criado_em|date:'d/m/Y H:i' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        </div>
+        <div>
+            <label class="text-white text-sm">Criador</label>
+            <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                <img src="{% if lead.criador.perfil.foto %}{{ lead.criador.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}" 
+                     alt="Foto do Criador" 
+                     class="w-8 h-8 rounded-full object-cover border-2 border-gray-600">
+                <span class="text-white">{{ lead.criador.username }}</span>
+            </div>
+        </div>
+        
+        {% if lead.responsavel %}
+            <div>
+                <label class="text-white text-sm">Responsável</label>
+                <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                    <img src="{% if lead.responsavel.perfil.foto %}{{ lead.responsavel.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}" 
+                         alt="Foto do Responsável" 
+                         class="w-8 h-8 rounded-full object-cover border-2 border-gray-600">
+                    <span class="text-white">{{ lead.responsavel.username }}</span>
+                </div>
+            </div>
+        {% endif %}
+          
+    </div>
+    {% if lead.orcamento_omie %}
+        <div class="grid grid-cols-4 gap-4 mt-4">
+            <div>
+                <label class="text-white text-sm">Número do Orçamento do Omie:</label>
+                <input type="text" value="{{ lead.orcamento_omie }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+            </div>
+            <div>
+                <label class="text-white text-sm">Forma de pagamento:</label>
+                <input type="text" value="{{ lead.forma_pagamento }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+            </div>
+        </div>
+    {% endif %}
+</div>

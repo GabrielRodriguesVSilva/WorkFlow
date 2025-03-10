@@ -10,6 +10,9 @@ import traceback
 # Suas credenciais da API Omie
 OMIE_URL_CLIENTE = "https://app.omie.com.br/api/v1/geral/clientes/"
 OMIE_URL_PRODUTO = "https://app.omie.com.br/api/v1/geral/produtos/"
+OMIE_URL_CUSTO = "https://app.omie.com.br/api/v1/produtos/tabelaprecos/"
+OMIE_URL_PEDIDO = "https://app.omie.com.br/api/v1/produtos/pedido/"
+
 OMIE_APP_KEY = "649289350710"
 OMIE_APP_SECRET = "ba03132fbeafde33d7a2f44ed2a7800d"
 
@@ -140,15 +143,79 @@ def add_produto_da_omie(codigo_produto):
 
         # Atualizar as características
         caracteristicas = produto_omie.get("caracteristicas", [])
-        for caract in caracteristicas:
-            Caracteristica.objects.update_or_create(
-                produto=produto,
-                nome=caract.get("cNomeCaract", ""),
-                defaults={"conteudo": caract.get("cConteudo", "")}
-            )
+        if caracteristicas:
+            for caract in caracteristicas:
+                Caracteristica.objects.update_or_create(
+                    produto=produto,
+                    nome=caract.get("cNomeCaract", ""),
+                    defaults={"conteudo": caract.get("cConteudo", "")}
+                )
 
         return produto
 
     except Exception as e:
         print("Detalhes do erro:", str(e))
         return False
+
+def buscar_produto_omie_detalhes(codigo_produto):
+    """Busca o produto na API do Omie pelo Código"""
+    payload = json.dumps({
+        "call": "ListarProdutos",
+        "app_key": OMIE_APP_KEY,
+        "app_secret": OMIE_APP_SECRET,
+        "param": [            {
+                "pagina": 1,
+                "registros_por_pagina": 50,
+                "apenas_importado_api": "N",
+                "filtrar_apenas_omiepdv": "N",
+                "exibir_tabelas_preco": "S",
+                "produtosPorCodigo": {
+                    "codigo": str(codigo_produto)
+                }
+            }]
+    })
+
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(OMIE_URL_PRODUTO, headers=headers, data=payload)
+    if response.status_code == 200:
+        omie_data = response.json()
+        return omie_data
+    return None
+
+def buscar_infos_tabela_omie(codigo_Tabela_preco):
+    """Busca o produto na API do Omie pelo Código"""
+    payload = json.dumps({
+        "call": "ConsultarTabelaPreco",
+        "app_key": OMIE_APP_KEY,
+        "app_secret": OMIE_APP_SECRET,
+        "param": [
+                {
+                    "nCodTabPreco": codigo_Tabela_preco,
+                    "cCodIntTabPreco": ""
+                }
+        ]
+    })
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(OMIE_URL_CUSTO, headers=headers, data=payload)
+    if response.status_code == 200:
+        omie_data = response.json()
+        return omie_data
+    return None
+
+def buscar_infos_do_orcamento(orcamento_id):
+    """Busca os detalhes do orçamento pelo ID"""
+    payload = json.dumps({
+        "call": "ConsultarPedido",
+        "app_key": OMIE_APP_KEY,
+        "app_secret": OMIE_APP_SECRET,
+        "param": [{"numero_pedido": orcamento_id}]
+    })
+
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(OMIE_URL_PEDIDO, headers=headers, data=payload)
+    if response.status_code == 200:
+        omie_data = response.json()
+        return omie_data
+    return None
+
+

@@ -2,17 +2,43 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 from .models import *
 from .api_omie import *
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Q   
 from datetime import timedelta
 import uuid
 import os
+from django.contrib.auth.decorators import login_required, user_passes_test
 
+def is_allowed_to_view_fluxo(user):
+    return user.has_perm('fluxo.pode_ver_fluxo') or user.is_superuser
+
+def is_allowed_to_view_todos_leads(user, lead_):
+    # Verifica se o usuário tem permissão para ver todos os leads ou se é superusuário
+    if user.has_perm('fluxo.pode_ver_todos_leads') or user.is_superuser:
+        return True
+    
+    # Caso contrário, verifica se o usuário é responsável ou criador do lead específico
+    if lead_:
+        if lead_.status == 0 and lead_.criador == user:
+            return True
+        elif lead_.responsavel == user:
+            return True
+        else:
+            return False
+
+    return False
+
+def is_allowed_to_view_apc(user):
+    return user.has_perm('fluxo.pode_modificar_apc') or user.is_superuser
+
+def is_allowed_to_view_apv(user):
+    return user.has_perm('fluxo.pode_modificar_apv') or user.is_superuser
 
 
 def login_view(request):
@@ -44,6 +70,7 @@ def usuarios(request):
 
 @login_required
 def add_user(request):
+    grupos = Group.objects.all()  # Lista de grupos disponíveis
     if request.method == 'POST':
         # Pega os dados do formulário
         username = request.POST.get('username')
@@ -63,62 +90,81 @@ def add_user(request):
             if foto:
                 perfil = PerfilUsuario.objects.create(usuario=user, foto=foto)
                 perfil.save()
+            
+                    # Atualizar grupo do usuário
+            grupo_id = request.POST.get('grupo')
+            if grupo_id:
+                novo_grupo = Group.objects.get(id=grupo_id)
+                user.groups.clear()  # Remove todos os grupos anteriores
+                user.groups.add(novo_grupo)  # Adiciona o novo grupo
+            
+            
 
             messages.success(request, "Usuário criado com sucesso!")
         return redirect('usuarios')  # Redireciona para a página de gerenciamento de usuários
-    else:
-        messages.error(request, "Todos os campos são obrigatórios.")
 
-    return render(request, 'Main/Usuarios/add_user.html')
+
+    return render(request, 'Main/Usuarios/add_user.html', {"grupos": grupos})
 
 @login_required
 def edit_user(request, user_id):
-    # Buscar o usuário que será editado
     user_edit = User.objects.get(id=user_id)
-    
-    # Verificar se o formulário foi enviado via POST
+    grupos = Group.objects.all()  # Lista de grupos disponíveis
+
     if request.method == "POST":
         # Atualizar os campos básicos do usuário
-        username = request.POST.get('username')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')  # Senha pode ser deixada em branco
-        
-        # Atualizar a foto, se houver
-        foto = request.FILES.get('foto')
-        
-        # Atualizar o usuário
-        user_edit.username = username
-        user_edit.first_name = first_name
-        user_edit.last_name = last_name
-        user_edit.email = email
-        
-        # Se a senha não foi deixada em branco, atualize a senha
+        user_edit.username = request.POST.get('username')
+        user_edit.first_name = request.POST.get('first_name')
+        user_edit.last_name = request.POST.get('last_name')
+        user_edit.email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Atualizar a senha se fornecida
         if password:
             user_edit.set_password(password)
-        
-        # Salvar as alterações do usuário
-        user_edit.save()
 
-        # Se houver uma nova foto de perfil, atualizar também
+        # Atualizar foto de perfil
+        foto = request.FILES.get('foto')
         if foto:
             perfil_usuario, created = PerfilUsuario.objects.get_or_create(usuario=user_edit)
             perfil_usuario.foto = foto
             perfil_usuario.save()
 
-        messages.success(request, 'Usuário atualizado com sucesso!')
+        # Atualizar grupo do usuário
+        grupo_id = request.POST.get('grupo')
+        if grupo_id:
+            novo_grupo = Group.objects.get(id=grupo_id)
+            user_edit.groups.clear()  # Remove todos os grupos anteriores
+            user_edit.groups.add(novo_grupo)  # Adiciona o novo grupo
+
+        user_edit.save()
+        messages.success(request, "Usuário atualizado com sucesso!")
         return redirect('edit_user', user_id=user_edit.id)
-    
-    # Caso o método seja GET, apenas renderiza o formulário
-    return render(request, 'Main/Usuarios/edit_user.html', {"user_edit": user_edit})
+
+    return render(request, 'Main/Usuarios/edit_user.html', {
+        "user_edit": user_edit,
+        "grupos": grupos,
+        "grupo_atual": user_edit.groups.first()  # Obtém o primeiro grupo do usuário
+    })
     
 
 @login_required
+@user_passes_test(is_allowed_to_view_fluxo, login_url='/')
 def fluxo(request):
+    # Verifica se o usuário tem permissão para ver todos os leads
+    if request.user.has_perm('fluxo.pode_ver_todos_leads'):
+        # Usuário pode ver todos os leads
+        leads = Lead.objects.all()
+    else:
+        # Caso contrário, mostra apenas os leads que o usuário é responsável ou criou
+        leads = Lead.objects.filter(
+            Q(status=0, criador=request.user) | Q(responsavel=request.user)
+        )
+
+    # Organize os leads por status
     leads_por_status = {status[0]: [] for status in Lead.STATUS_CHOICES}
 
-    for lead in Lead.objects.all():
+    for lead in leads:
         leads_por_status[lead.status].append(lead)
 
     context = {
@@ -127,6 +173,7 @@ def fluxo(request):
     }
 
     return render(request, 'Main/Fluxo/fluxo.html', context)
+
 
 @login_required
 def buscar_clientes(request):
@@ -210,24 +257,48 @@ def add_lead(request, cliente_id):
 
     return redirect('fluxo')
 
+
 @login_required
 def lead(request, lead_id):
     lead_ = Lead.objects.get(id=lead_id)
-    vendedores = User.objects.all()
 
-    if lead_:
-        produtos_lead = LeadProduto.objects.filter(lead=lead_)  # Correção aqui!
-        context = {
-            "lead": lead_,
-            "vendedores": vendedores,
-            "produtos_lead": produtos_lead,
-            "STATUS_CHOICES": Lead.STATUS_CHOICES,
-            "ACAO_CHOICES": LeadAcao.ACAO_CHOICES,
-        }
-        return render(request, 'Main/Fluxo/Lead/lead.html', context)
-    else:
+    if not lead_:
         messages.error(request, "Lead não encontrado!")
         return redirect('fluxo')
+    
+
+    if not is_allowed_to_view_todos_leads(request.user, lead_):
+        messages.error(request, "Você não tem permissão para acessar este Lead!")
+        return redirect('fluxo') 
+
+    try:
+        vendedores = User.objects.filter(groups__name__icontains="Vendas")
+    except:
+        vendedores = User.objects.all()
+
+    
+    # Atualizar o Lead com os dados do Omie
+    if lead_.status > 4:
+        orcamento_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
+        if orcamento_omie:
+            total = orcamento_omie.get('pedido_venda_produto')
+            if total:
+                pedido = total.get('total_pedido')
+                custo = pedido.get('valor_total_pedido')
+                lead_.valor = float(custo)
+                lead_.save()
+
+
+
+    produtos_lead = LeadProduto.objects.filter(lead=lead_)
+    context = {
+        "lead": lead_,
+        "vendedores": vendedores,
+        "produtos_lead": produtos_lead,
+        "STATUS_CHOICES": Lead.STATUS_CHOICES,
+        "ACAO_CHOICES": LeadAcao.ACAO_CHOICES,
+    }
+    return render(request, 'Main/Fluxo/Lead/lead.html', context)
 
 @login_required
 def edit_lead_analise(request, lead_id):
@@ -292,6 +363,7 @@ def buscar_produto(request, lead_id):
 
     # Busca ou cria o produto no banco
     produto_data = add_produto_da_omie(codigo_produto)
+    print(produto_data)
     if not produto_data:
         messages.error(request, "Produto não encontrado na Omie!")
         return render(request, 'Main/Includes/htmx_messages.html')
@@ -347,6 +419,13 @@ def edit_lead_atendimento(request, lead_id):
     lead_ = Lead.objects.get(id=lead_id)
     if lead_:
         orcamento_omie = request.POST.get('orcamento_omie')
+        if orcamento_omie:
+            orc_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
+            if not orc_omie:
+                messages.error(request, "Orçamento do Omie Não Encontrado!")
+                return redirect('lead', lead_id)
+
+
         forma_pagamento = request.POST.get('forma_pagamento')
         atendimento = request.POST.get('atendimento')
 
@@ -382,6 +461,7 @@ def edit_lead_atendimento(request, lead_id):
         return redirect('lead', lead_id)
 
 @login_required
+@user_passes_test(is_allowed_to_view_apc, login_url='/')
 def apc_view(request):
     leads_em_apc = Lead.objects.filter(status=2) \
         .annotate(qnt_itens=Count('produtos')) \
@@ -393,6 +473,7 @@ def apc_view(request):
     return render(request, 'Main/Compras/APC/apc.html', context)
 
 @login_required
+@user_passes_test(is_allowed_to_view_apc, login_url='/')
 def apc_lead(request, lead_id):
     lead_ = Lead.objects.get(id=lead_id)
 
@@ -541,12 +622,14 @@ def edit_lead_apc(request, lead_id):
         return redirect('apc')
     
 @login_required
+@user_passes_test(is_allowed_to_view_apv, login_url='/')
 def apv_view(request):
     leads_em_apv = Lead.objects.filter(status=3).annotate(qnt_itens=Count('produtos')).order_by('apc_em')
     context = {"leads_em_apv": leads_em_apv,}
     return render(request, 'Main/Compras/APV/apv.html', context)
 
 @login_required
+@user_passes_test(is_allowed_to_view_apv, login_url='/')
 def apv_lead(request, lead_id):
     lead_ = Lead.objects.get(id=lead_id)
     if lead_:
@@ -694,8 +777,20 @@ def comentario_lead(request, lead_id):
             descricao=descricao_cmt,
             imagem=arquivo,
         )
-        messages.success(request, "Comentário enviado com sucesso!")
-        return redirect('lead', lead_id)
+        referer = request.META.get("HTTP_REFERER", "Página desconhecida")
+
+        if "/apc/lead/" in referer:
+            messages.success(request, "Comentário enviado com sucesso!")
+            return redirect('apc')
+        elif "/apv/lead/" in referer:
+            messages.success(request, "Comentário enviado com sucesso!")
+            return redirect('apv')
+        elif "/lead/" in referer:
+            messages.success(request, "Comentário enviado com sucesso!")
+            return redirect('lead', lead_id)
+        else:
+            messages.success(request, "Comentário enviado com sucesso!")
+            return redirect('home')
     else:
         messages.error(request, "Lead não encontrado!")
         return redirect('fluxo')
