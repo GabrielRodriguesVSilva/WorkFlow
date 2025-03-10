@@ -27,16 +27,19 @@
         .bg-primary {
             background-color: #0F62AC;
         }
+
         .icon {
             font-size: 24px;
             color: #e3e3e3;
         }
+
         /* Estilização do fundo com opacidade */
         .main-container {
             position: relative;
             min-height: 100vh;
             overflow: hidden;
         }
+
         .main-container::before {
             content: "";
             position: absolute;
@@ -45,8 +48,18 @@
             width: 100%;
             height: 100%;
             background: url("{% static 'image/background.jpg' %}") no-repeat center center/cover;
-            /* opacity: 0.3; */
             z-index: -1;
+        }
+
+        /* Classe para esconder o conteúdo até carregar a imagem */
+        .hidden {
+            visibility: hidden;
+        }
+
+        /* Classe para mostrar o conteúdo após o carregamento */
+        .visible {
+            visibility: visible;
+            transition: visibility 0.3s ease;
         }
     </style>
 </head>
@@ -107,11 +120,12 @@
                 <span class="ml-2 sidebar-text" translate="no">APV</span>
             </a>
         {% endif %}
-        
+        {% if perms.perfil.gerencia_usuario or request.user.is_superuser %}
         <a href="{% url 'usuarios' %}" class="flex items-center p-3 hover:bg-sky-500 hover:text-white transition-all duration-300 rounded-lg">
             <span class="material-symbols-outlined text-lg" translate="no">group</span> 
             <span class="ml-2 sidebar-text">Usuários</span>
         </a>
+        {% endif %}
 
     </nav>
 
@@ -127,6 +141,7 @@
         </p>
     </div>
 </aside>
+
     
 <script>
     function toggleSidebar() {

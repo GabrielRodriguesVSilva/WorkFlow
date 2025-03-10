@@ -7,6 +7,11 @@ class PerfilUsuario(models.Model):
     foto = models.ImageField(upload_to="perfil_fotos/", blank=True, null=True)
     ativo = models.BooleanField(default=True)
 
+    class Meta:
+        permissions = [
+            ("gerencia_usuario", "Gerencia Usuário"),
+        ]
+
     def __str__(self):
         return f"Perfil de {self.usuario.username}"
 

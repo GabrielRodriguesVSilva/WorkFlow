@@ -40,6 +40,9 @@ def is_allowed_to_view_apc(user):
 def is_allowed_to_view_apv(user):
     return user.has_perm('fluxo.pode_modificar_apv') or user.is_superuser
 
+def is_allowed_to_view_usuarios(user):
+    return user.has_perm('perfil.gerencia_usuario') or user.is_superuser
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -64,11 +67,13 @@ def home(request):
     return render(request, 'Main/home.html')
 
 @login_required
+@user_passes_test(is_allowed_to_view_usuarios, login_url='/')
 def usuarios(request):
     users = User.objects.all()
     return render(request, 'Main/Usuarios/usuarios.html', {"users": users})
 
 @login_required
+@user_passes_test(is_allowed_to_view_usuarios, login_url='/')
 def add_user(request):
     grupos = Group.objects.all()  # Lista de grupos disponíveis
     if request.method == 'POST':
@@ -107,6 +112,7 @@ def add_user(request):
     return render(request, 'Main/Usuarios/add_user.html', {"grupos": grupos})
 
 @login_required
+@user_passes_test(is_allowed_to_view_usuarios, login_url='/')
 def edit_user(request, user_id):
     user_edit = User.objects.get(id=user_id)
     grupos = Group.objects.all()  # Lista de grupos disponíveis
