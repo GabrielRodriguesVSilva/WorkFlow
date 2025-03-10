@@ -115,6 +115,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),  # Garante que o Django encontre os arquivos na pasta 'static'
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 LOGIN_URL = 'login'
 
 # Default primary key field type
