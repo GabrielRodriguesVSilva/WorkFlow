@@ -284,13 +284,16 @@ def lead(request, lead_id):
     # Atualizar o Lead com os dados do Omie
     if lead_.status > 4:
         orcamento_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
-        if orcamento_omie:
-            total = orcamento_omie.get('pedido_venda_produto')
-            if total:
-                pedido = total.get('total_pedido')
-                custo = pedido.get('valor_total_pedido')
-                lead_.valor = float(custo)
-                lead_.save()
+        try:
+            if orcamento_omie:
+                total = orcamento_omie.get('pedido_venda_produto')
+                if total:
+                    pedido = total.get('total_pedido')
+                    custo = pedido.get('valor_total_pedido')
+                    lead_.valor = float(custo)
+                    lead_.save()
+        except:
+            pass
 
 
 
