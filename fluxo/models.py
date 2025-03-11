@@ -179,6 +179,7 @@ class LeadAcao(models.Model):
         (19, 'Satus da Proposta'),
         (20, 'Proposta Finalizada'),
         (21, 'Retorno de Status'),
+        (22, 'Declinar Lead'),
     ]
     
     acao = models.CharField(max_length=20, choices=ACAO_CHOICES)

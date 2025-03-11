@@ -37,8 +37,6 @@
     <!-- Linha divisória -->
     <hr class="border-t-2 border-white my-1">
 
-    <!-- Linha de Progresso dos Status -->
-
     {% include 'Main/Includes/include_status.html' %}
 
     <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
@@ -165,126 +163,8 @@
 
             </form>
         </div>
-        <div class="mt-4 p-4 rounded-lg bg-gray-900 shadow-lg">
-            <div class="flex justify-between items-center cursor-pointer toggle-section">
-                <h2 class="text-lg font-semibold text-white">Historico de Ações</h2>
-                <span class="material-symbols-outlined text-white">expand_less</span>
-            </div>
-            <div>
-                <hr class="border-t-2 border-white my-1">
-                <!-- Formulário para adicionar comentário ou arquivo -->
-                <form action="{% url 'comentario_lead' lead.id %}" method="POST" enctype="multipart/form-data" class="mb-4 mt-4">
-                    {% csrf_token %}
-                    <div class="flex flex-col space-y-2">
-                        <!-- Campo de comentário -->
-                        <textarea name="descricao_cmt" placeholder="Digite um comentário..." 
-                                class="w-full p-2 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows="4"></textarea>
 
-                        <!-- Campo de upload e botões alinhados à direita -->
-                        <div class="flex justify-end items-center space-x-2">
-                            <input type="file" name="arquivo" class="hidden" id="file-upload">
-                            
-                            <!-- Botão de anexar arquivo -->
-                            <label for="file-upload" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-1">
-                                <span class="material-symbols-outlined">upload_file</span>
-                                <span>Anexar</span>
-                            </label>
-
-                            <!-- Botão de enviar -->
-                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-1">
-                                <span class="material-symbols-outlined">send</span>
-                                <span>Enviar</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-
-                <div class="space-y-4 mt-2">
-                    {% for acao_lead in lead.acoes.all|dictsortreversed:"data" %}
-                    <div class="flex space-x-4 bg-gray-800 p-4 rounded-lg shadow">
-                        <!-- Foto do Usuário -->
-                        <div>
-                            {% if acao_lead.usuario.perfil.foto %}
-                                <img src="{{ acao_lead.usuario.perfil.foto.url }}" 
-                                        alt="Foto de {{ acao_lead.usuario.username }}" 
-                                        class="w-12 h-12 rounded-full border-2 border-gray-600 object-cover">
-                            {% else %}
-                                <div class="w-12 h-12 flex items-center justify-center bg-gray-700 text-white rounded-full border-2 border-gray-600">
-                                    {{ acao_lead.usuario.username|first|upper }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-            
-                        <!-- Conteúdo da Ação -->
-                        <div class="flex-1">
-                            <div class="flex justify-between items-center">
-                                <span class="text-white font-semibold">{{ acao_lead.usuario.username }}</span>
-                                <span class="text-sm text-gray-400">{{ acao_lead.data|date:"d/m/Y H:i" }}</span>
-                            </div>
-                            
-                            <!-- Template específico para cada ação -->
-                            <div class="mt-2 text-gray-300">
-                                {% if acao_lead.acao == "0" %}
-                                    <div class="inline-flex items-center space-x-2 text-green-400 bg-green-900/30 p-2 rounded-lg shadow-md border border-green-600 max-w-fit">
-                                        <span class="material-symbols-outlined text-2xl">add_circle</span>
-                                        <p class="font-semibold">Lead criado.</p>
-                                    </div>
-                                {% elif acao_lead.acao == "1" %}
-                                    <p class="text-blue-400">Comentário: "{{ acao_lead.descricao }}"</p>
-                                {% elif acao_lead.acao == "2" %}
-                                    <p class="text-yellow-400">Status alterado: {{ acao_lead.descricao }}</p>
-                                {% elif acao_lead.acao == "3" %}
-                                    <p class="text-orange-400">Solicitação do cliente: "{{ acao_lead.descricao }}"</p>
-                                {% elif acao_lead.acao == "12" %}
-                                    <div class="flex items-center space-x-2 text-sky-400">
-                                        <img src="https://www.omie.com.br/assets/images/logo-omie.png" alt="Omie Logo" class="h-6 mr-2">
-                                        <p>Proposta de Vendas anexada:</p>
-                                        <a href="{{ acao_lead.pdf_omie.url }}" class="text-sky-300 underline bg-gray-700 px-2 py-1 rounded-lg hover:bg-gray-600">
-                                            Baixar PDF
-                                        </a>
-                                    </div>
-                                {% elif acao_lead.acao == "13" %}
-                                    <div class="text-pink-400">
-                                        <p>Imagem anexada:</p>
-                                        <a href="{{ acao_lead.imagem.url }}" target="_blank" rel="noopener noreferrer">
-                                            <img src="{{ acao_lead.imagem.url }}" 
-                                                class="inline-flex max-h-48 rounded-lg mt-2 shadow-lg border border-gray-600 
-                                                        transition-transform transform hover:scale-105 hover:shadow-xl 
-                                                        object-contain aspect-auto">
-                                            </a>
-                                    </div>
-                                {% elif acao_lead.acao == "14" %}
-                                    <div class="flex items-center space-x-2 text-purple-400">
-                                        <span class="material-symbols-outlined text-red-500 text-4xl">picture_as_pdf</span>
-                                        <p>PFD anexado:</p>
-                                        <a href="{{ acao_lead.imagem.url }}" class="text-purple-300 underline bg-gray-700 px-2 py-1 rounded-lg hover:bg-gray-600">
-                                            Baixar PDF
-                                        </a>
-                                    </div>
-                                {% elif acao_lead.acao == "15" %}
-                                    <div class="flex items-center space-x-2 text-blue-400">
-                                        <span class="material-symbols-outlined text-blue-500 text-4xl">description</span>
-                                        <p>Arquivo anexado:</p>
-                                        <a href="{{ acao_lead.imagem.url }}" class="text-blue-300 underline bg-gray-700 px-2 py-1 rounded-lg hover:bg-gray-600">
-                                            Baixar Arquivo
-                                        </a>
-                                    </div>
-                                {% else %}
-                                    <p class="text-gray-400">{{ acao_lead.descricao }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-gray-400 text-center">Nenhuma ação registrada para este lead.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-            
+        {% include 'Main/Includes/historico_lead.html' %}
   
     </div>
 
@@ -310,6 +190,6 @@
                 });
             });
         });
-    
     </script>
+    
 {% endblock %}

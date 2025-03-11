@@ -33,6 +33,8 @@ urlpatterns = [
     path('finalizar-lead/<int:id_status_proposta>/<int:lead_id>/', get_finalizar_lead, name='get_finalizar_lead'),
     path('finalizar/<int:id_status_proposta>/<int:lead_id>/', edit_lead_finalizado, name='edit_lead_finalizado'),
     path('retorno-status/<int:lead_id>/<int:status_id>/', get_form_retorno_status, name='get_form_retorno_status'),
+    path('deletar_lead/<int:lead_id>/', deletar_lead, name='deletar_lead'),
+    path('declinar_lead/<int:lead_id>/', declinar_lead, name='declinar_lead'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

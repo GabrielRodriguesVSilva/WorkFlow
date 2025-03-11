@@ -283,17 +283,18 @@ def lead(request, lead_id):
     
     # Atualizar o Lead com os dados do Omie
     if lead_.status > 4:
-        orcamento_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
-        try:
-            if orcamento_omie:
-                total = orcamento_omie.get('pedido_venda_produto')
-                if total:
-                    pedido = total.get('total_pedido')
-                    custo = pedido.get('valor_total_pedido')
-                    lead_.valor = float(custo)
-                    lead_.save()
-        except:
-            pass
+        if lead_.orcamento_omie:
+            orcamento_omie = buscar_infos_do_orcamento(lead_.orcamento_omie)
+            try:
+                if orcamento_omie:
+                    total = orcamento_omie.get('pedido_venda_produto')
+                    if total:
+                        pedido = total.get('total_pedido')
+                        custo = pedido.get('valor_total_pedido')
+                        lead_.valor = float(custo)
+                        lead_.save()
+            except:
+                pass
 
 
 
@@ -733,7 +734,7 @@ def edit_lead_orcamento(request, lead_id):
                 acao=12,
                 descricao=f"O {request.user.username} anexou o orçamento no Lead {lead_.cliente.nome_fantasia}",
             )
-            lead_acao.pdf_omie.name = f"leads_omie/{unique_filename}"  # Define o caminho personalizado
+            lead_acao.pdf_omie.save(f"leads_omie/{unique_filename}", pdf_omie)  # ✅ Salva corretamente
             lead_acao.save()
 
             # Registra a alteração de status
@@ -788,10 +789,10 @@ def comentario_lead(request, lead_id):
 
         if "/apc/lead/" in referer:
             messages.success(request, "Comentário enviado com sucesso!")
-            return redirect('apc')
+            return redirect('apc_lead', lead_id)
         elif "/apv/lead/" in referer:
             messages.success(request, "Comentário enviado com sucesso!")
-            return redirect('apv')
+            return redirect('apv_lead', lead_id)
         elif "/lead/" in referer:
             messages.success(request, "Comentário enviado com sucesso!")
             return redirect('lead', lead_id)
@@ -950,3 +951,39 @@ def get_form_retorno_status(request, lead_id, status_id):
             return redirect('lead', lead_id)
         
     return render(request, 'Main/Fluxo/Includes/from_retorno_lead.html', {"lead": lead_, "status_id": status_id, "status_label": status_label})
+
+@login_required
+def deletar_lead(request, lead_id):
+    lead_ = Lead.objects.get(id=lead_id)
+    if lead_:
+        if request.user.has_perm('fluxo.pode_excluir_lead'):
+            lead_.delete()
+            messages.success(request, "Lead deletado com sucesso!")
+            return redirect('fluxo')
+        else:
+            messages.error(request, "Você não tem permissão para deletar o Lead!")
+            return redirect('fluxo')
+    else:
+        messages.error(request, "Lead não encontrado!")
+        return redirect('fluxo')
+
+@login_required
+def declinar_lead(request, lead_id):
+    lead_ = Lead.objects.get(id=lead_id)
+    if lead_:
+        if request.user.has_perm('fluxo.pode_modificar_declinar'):
+            lead_.status = 6
+            lead_.save()
+            LeadAcao.objects.create(
+                lead=lead_,
+                usuario=request.user,
+                acao=22,
+                descricao=f"O Lead foi Declinado",
+            )
+            messages.success(request, "Lead declinado com sucesso!")
+            return redirect('fluxo')
+        else:
+            messages.error(request, "Você não tem permissão para deletar o Lead!")
+            return redirect('fluxo')
+
+

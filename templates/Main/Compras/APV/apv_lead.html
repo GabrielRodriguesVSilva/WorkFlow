@@ -23,57 +23,61 @@
 
     {% include 'Main/Includes/include_status.html' %}
 
-    <div class="mt-4 p-4 rounded-lg bg-gray-900">
-        <div class="flex justify-between items-center cursor-pointer toggle-section">
-            <h2 class="text-lg font-semibold text-white">Informações do Lead</h2>
-            <span class="material-symbols-outlined text-white">expand_less</span>
-        </div>
-        <div>
-            <hr class="border-t-2 border-white my-1">
+    <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-2 flex flex-col overflow-auto max-h-[80vh] custom-scroll">
 
-            <div class="grid grid-cols-4 gap-4 mt-4">
-                <div>
-                    <label class="text-white text-sm">Inscrição Estadual</label>
-                    <input type="text" value="{{ lead.cliente.instituicao|default:'Sem Inscrição estadual' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+        <div class="mt-4 p-4 rounded-lg bg-gray-900">
+            <div class="flex justify-between items-center cursor-pointer toggle-section">
+                <h2 class="text-lg font-semibold text-white">Informações do Lead</h2>
+                <span class="material-symbols-outlined text-white">expand_less</span>
+            </div>
+
+            <div>
+                <hr class="border-t-2 border-white my-1">
+
+                <div class="grid grid-cols-4 gap-4 mt-4">
+                    <div>
+                        <label class="text-white text-sm">Inscrição Estadual</label>
+                        <input type="text" value="{{ lead.cliente.instituicao|default:'Sem Inscrição estadual' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                    </div>
+                    <div>
+                        <label class="text-white text-sm">Finalidade</label>
+                        <input type="text" value="{{ lead.get_finalidade_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                    </div>
+                    {% if lead.responsavel %}
+                    <div>
+                        <label class="text-white text-sm">Responsável</label>
+                        <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
+                            <img src="{% if lead.responsavel.perfil.foto %}{{ lead.responsavel.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}" alt="Foto do Responsável" class="w-8 h-8 rounded-full">
+                            <span class="text-white">{{ lead.responsavel.username }}</span>
+                        </div>
+                    </div>
+                    {% endif %}  
                 </div>
-                <div>
-                    <label class="text-white text-sm">Finalidade</label>
-                    <input type="text" value="{{ lead.get_finalidade_display }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
-                </div>
-                {% if lead.responsavel %}
-                <div>
-                    <label class="text-white text-sm">Responsável</label>
-                    <div class="flex items-center space-x-2 bg-gray-800 p-2 rounded-lg border border-gray-600">
-                        <img src="{% if lead.responsavel.perfil.foto %}{{ lead.responsavel.perfil.foto.url }}{% else %}{% static 'image/user_default.png' %}{% endif %}" alt="Foto do Responsável" class="w-8 h-8 rounded-full">
-                        <span class="text-white">{{ lead.responsavel.username }}</span>
+
+                <h3 class="text-lg font-semibold text-white mt-6">Localização do Cliente</h3>
+                <div class="grid grid-cols-4 gap-4 mt-2">
+                    <div>
+                        <label class="text-white text-sm">Endereço</label>
+                        <input type="text" value="{{ lead.cliente.logradouro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                    </div>
+                    <div>
+                        <label class="text-white text-sm">Bairro</label>
+                        <input type="text" value="{{ lead.cliente.bairro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                    </div>
+                    <div>
+                        <label class="text-white text-sm">Cidade</label>
+                        <input type="text" value="{{ lead.cliente.cidade }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
+                    </div>
+                    <div>
+                        <label class="text-white text-sm">CEP</label>
+                        <input type="text" value="{{ lead.cliente.cep }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
                     </div>
                 </div>
-                {% endif %}  
-            </div>
-
-            <h3 class="text-lg font-semibold text-white mt-6">Localização do Cliente</h3>
-            <div class="grid grid-cols-4 gap-4 mt-2">
-                <div>
-                    <label class="text-white text-sm">Endereço</label>
-                    <input type="text" value="{{ lead.cliente.logradouro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
-                </div>
-                <div>
-                    <label class="text-white text-sm">Bairro</label>
-                    <input type="text" value="{{ lead.cliente.bairro }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
-                </div>
-                <div>
-                    <label class="text-white text-sm">Cidade</label>
-                    <input type="text" value="{{ lead.cliente.cidade }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
-                </div>
-                <div>
-                    <label class="text-white text-sm">CEP</label>
-                    <input type="text" value="{{ lead.cliente.cep }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" readonly>
-                </div>
             </div>
         </div>
-    </div>
+
         <div class="mt-4 p-4 rounded-lg bg-gray-900 shadow-lg">
-            <div class="flex justify-between items-center cursor-pointer toggle-section">
+            <div class="flex justify-between items-center cursor-pointer">
                 <h2 class="text-lg font-semibold text-white">Orçamento do Lead</h2>
             </div>
 
@@ -139,14 +143,19 @@
                     <label class="text-white text-sm">Informações para Vendas:</label>
                     <textarea name="apv_analise" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600"></textarea>
                 </div>
-    
+
                 <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
                     Enviar Orçamento
                 </button>
 
             </form>
         </div>
+
+        {% include 'Main/Includes/historico_lead.html' %}
+        
     </div>
+
+    
 </div>
 
 
