@@ -655,32 +655,23 @@ def apv_lead(request, lead_id):
 @login_required
 def editar_produto_lead_apv(request, produto_lead_id):
     produto_lead = LeadProduto.objects.get(id=produto_lead_id)
-    if not produto_lead:
-        messages.error(request, "Produto não encontrado!")
-        return redirect('apv_lead', produto_lead.lead.id)
 
-    # Obtém o valor do input e substitui ',' por '.'
-    valor_unitario_str = request.POST.get("valor_unitario")
-    if valor_unitario_str:
-        valor_unitario = float(valor_unitario_str.replace(",", "."))
-    else:
-        valor_unitario = float(produto_lead.custo_unitario)  # Mantém o valor original caso não seja enviado nada
+    if request.method == "POST":
+        valor_unitario_str = request.POST.get("valor_unitario", "").strip()
 
-    produto_lead.valor_unitario = valor_unitario
-    produto_lead.save()
+        if valor_unitario_str:  # Evita erro se o campo estiver vazio
+            try:
+                valor_unitario = float(valor_unitario_str.replace(",", "."))
+                produto_lead.valor_unitario = valor_unitario
+                produto_lead.save()
+                produto_lead.produto.save()  # Se necessário
+            except ValueError:
+                return JsonResponse({"error": "Valor inválido"}, status=400)
 
-    # Editando produto
-    produto_lead.valor_unitario = valor_unitario
-    produto_lead.produto.save()
+        return JsonResponse({"message": "Recebido com sucesso", "valor_unitario": valor_unitario_str}, status=200)
 
-    LeadAcao.objects.create(
-        lead=produto_lead.lead,
-        usuario=request.user,
-        acao=9,
-        descricao=f"Valor do produto {produto_lead.produto.descricao} Atualizado",
-    )
 
-    return render(request, 'Main/Compras/APV/produto_lead.html', {"produto_lead": produto_lead})
+    return JsonResponse({"error": "Método não permitido"}, status=405)
 
 @login_required
 def edit_lead_apv(request, lead_id):

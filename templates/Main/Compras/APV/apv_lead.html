@@ -86,56 +86,53 @@
             <table class="w-full mt-4 border-collapse bg-gray-900 text-white rounded-lg shadow-lg">
                 <thead>
                     <tr class="bg-gray-800 text-white">
-                        <th class="p-2 border border-gray-700">Código</th>
-                        <th class="p-2 border border-gray-700">Descrição</th>
-                        <th class="p-2 border border-gray-700">Qnt</th>
-                        <th class="p-2 border border-gray-700">Prazo</th>
-                        <th class="p-2 border border-gray-700">Val</th>
-                        <th class="p-2 border border-gray-700">Custo</th>
-                        <th class="p-2 border border-gray-700">Preço Cal.</th>
-                        <th class="p-2 border border-gray-700">Preço</th>
-                        <th class="p-2 border border-gray-700">Ação</th>
+                        <th class="p-3 border border-gray-700 text-left">Código</th>
+                        <th class="p-3 border border-gray-700 text-left">Descrição</th>
+                        <th class="p-3 border border-gray-700 text-center">Qnt</th>
+                        <th class="p-3 border border-gray-700 text-center">Prazo</th>
+                        <th class="p-3 border border-gray-700 text-center">Val</th>
+                        <th class="p-3 border border-gray-700 text-center">Custo</th>
+                        <th class="p-3 border border-gray-700 text-center">Preço Cal.</th>
+                        <th class="p-3 border border-gray-700 text-center">Preço</th>
                     </tr>
                 </thead>
                 <tbody id="produto-list">
                     {% for produto_lead in produtos_lead %}
-                    <tr class="border border-gray-700">
-                        <td class="p-2 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
-                        <td class="p-2 border border-gray-700">
+                    <tr class="border border-gray-700 hover:bg-gray-800 transition duration-200">
+                        <td class="p-3 border border-gray-700">{{ produto_lead.produto.codigo_produto }}</td>
+                        <td class="p-3 border border-gray-700">
                             {{ produto_lead.produto.descricao|safe|truncatechars:25 }}
                         </td>                        
-                        <td class="p-2 border border-gray-700">{{ produto_lead.quantidade }}</td>
-                        <td class="p-2 border border-gray-700">{{ produto_lead.prazo }}</td>
-                        <td class="p-2 border border-gray-700">{{ produto_lead.validade }}</td>
-                        <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto.custo_unitario|floatformat:2 }}</td>
-                        <td class="p-2 border border-gray-700">R$ {{ produto_lead.produto|calcular_preco  }}</td>
+                        <td class="p-3 border border-gray-700 text-center">{{ produto_lead.quantidade }}</td>
+                        <td class="p-3 border border-gray-700 text-center">{{ produto_lead.prazo }}</td>
+                        <td class="p-3 border border-gray-700 text-center">{{ produto_lead.validade }}</td>
+                        <td class="p-3 border border-gray-700 text-center">R$ {{ produto_lead.produto.custo_unitario|floatformat:2 }}</td>
+                        <td class="p-3 border border-gray-700 text-center">R$ {{ produto_lead.produto|calcular_preco }}</td>
                         
-                        <!-- Campo editável - Custo -->
-                        <td class="p-2 border border-gray-700">
-                            R$ 
-                            <input type="text" 
-                                name="valor_unitario" 
-                                value="{{ produto_lead.valor_unitario|default:0|floatformat:2 }}" 
-                                class="w-16 p-1 bg-gray-800 text-white rounded border border-gray-600 text-center"
-                                pattern="[0-9]+([.,][0-9]+)?" required>
+                        <!-- Campo editável - Custo com R$ embutido -->
+                        <td class="p-3 border border-gray-700 text-center">
+                            <div class="relative w-25 flex items-center">
+                                <span class="absolute left-3 text-gray-400">R$</span>
+                                <input type="text" 
+                                    name="valor_unitario" 
+                                    pattern="[0-9]+([.,][0-9]+)?"
+                                    value="{{ produto_lead.valor_unitario|default:0|floatformat:2 }}" 
+                                    class="w-full pl-7 pr-2 py-1 bg-gray-800 text-white rounded border border-gray-600 text-center focus:ring-2 focus:ring-green-500 outline-none"
+                                    required
+                                    hx-post="{% url 'editar_produto_lead_apv' produto_lead.id %}"
+                                    hx-trigger="input delay:500ms" 
+                                    hx-include="this"
+                                    hx-swap="none"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    oninput="this.value = this.value.replace(/[^0-9.,]/g, '')">
+                            </div>
                         </td>
-
-                        <!-- Botão de Salvar -->
-                        <td class="p-2 text-center border border-gray-700">
-                            <button 
-                                class="text-green-500 hover:text-green-700"
-                                hx-post="{% url 'editar_produto_lead_apv' produto_lead.id %}"
-                                hx-target="closest tr"
-                                hx-include="closest tr"
-                                hx-swap="outerHTML"
-                                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'> 
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
-                        </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            
 
             <form method="POST" action="{% url 'edit_lead_apv' lead.id %}">
                 {% csrf_token %}
