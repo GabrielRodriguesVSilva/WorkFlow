@@ -112,12 +112,20 @@ class Lead(models.Model):
         (11, 'Preferência de marca'),
     ]
 
+    VENDEDOR_MOT_CHOICES = [
+        (0, 'Sem Criterios'),
+        (1, 'Vendedor responsável no Omie'),
+        (2, 'Vendedor com faixa de CEP'),
+        (3, 'Vendedor com histórico de atribuições'),
+    ]
+
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     finalidade = models.IntegerField(choices=FINALIDADE_CHOICES, default=0)
     tipo = models.IntegerField(choices=TIPO_CHOICES, default=0)
     origem = models.IntegerField(choices=ORIGEM_CHOICES, default=0)
     temperatura = models.IntegerField(choices=TEMPERATURA_CHOICES, default=0)
     status_apc = models.IntegerField(choices=STATUS_APC_CHOICES, default=0)
+    vendedor_mot = models.IntegerField(choices=VENDEDOR_MOT_CHOICES, default=0)
 
     cliente_final = models.CharField(max_length=255, blank=True, null=True)
     solicitacao = models.TextField()
@@ -256,3 +264,8 @@ class LeadProduto(models.Model):
 
     class Meta:
         unique_together = ("lead", "produto")
+
+class LeadAssignment(models.Model):
+    lead = models.ForeignKey('Lead', on_delete=models.CASCADE)
+    vendedor = models.ForeignKey(User, on_delete=models.CASCADE)
+    data_atribuicao = models.DateTimeField(auto_now_add=True)

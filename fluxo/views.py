@@ -228,38 +228,45 @@ def add_lead(request, cliente_id):
         criador = request.user
 
 
-        vendedor_ind = vendedor_indicado(cliente)
-        print(vendedor_ind)
+        vendedor, origem_vendedor = vendedor_indicado(cliente)
+
         
-        # # Criando o lead no banco de dados
-        # lead = Lead.objects.create(
-        #     cliente=cliente,
-        #     finalidade=finalidade,
-        #     criador=criador,
-        #     tipo=tipo,
-        #     origem=origem,
-        #     temperatura=temperatura,
-        #     ticket=ticket,
-        #     cliente_final=cliente_final,
-        #     solicitacao=solicitacao,
-        #     valor=0,
-        # )
+        # Criando o lead no banco de dados
+        lead = Lead.objects.create(
+            cliente=cliente,
+            finalidade=finalidade,
+            criador=criador,
+            tipo=tipo,
+            origem=origem,
+            temperatura=temperatura,
+            ticket=ticket,
+            cliente_final=cliente_final,
+            solicitacao=solicitacao,
+            valor=0,
+        )
 
-        # #Criar Ação de Criação	
-        # LeadAcao.objects.create(
-        #     lead=lead,
-        #     usuario=criador,
-        #     acao=0,
-        #     descricao=f"Lead criado por {criador.username}",
-        # )
+        if origem_vendedor == 3:
+            LeadAssignment.objects.create(lead=lead, vendedor=vendedor)
+            lead.user_indicado = vendedor
+            lead.vendedor_mot = origem_vendedor
+            lead.save()
 
-        # #Adcionar Solicitação do Cliente
-        # LeadAcao.objects.create(
-        #     lead=lead,
-        #     usuario=criador,
-        #     acao=3,
-        #     descricao=solicitacao,
-        # )
+
+        #Criar Ação de Criação	
+        LeadAcao.objects.create(
+            lead=lead,
+            usuario=criador,
+            acao=0,
+            descricao=f"Lead criado por {criador.username}",
+        )
+
+        #Adcionar Solicitação do Cliente
+        LeadAcao.objects.create(
+            lead=lead,
+            usuario=criador,
+            acao=3,
+            descricao=solicitacao,
+        )
 
         messages.success(request, "Lead adicionado com sucesso!")
         return redirect('fluxo')

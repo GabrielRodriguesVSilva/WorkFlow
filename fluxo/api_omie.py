@@ -3,6 +3,7 @@ import requests
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import *
+from django.db.models import Count, Min
 from django.db import IntegrityError
 import traceback
 from django.contrib.auth.models import User
@@ -112,29 +113,57 @@ def add_cliente_da_omie(cnpj):
     except IntegrityError:
         return False
 
+from django.db.models import Max
+
 def vendedor_indicado(cliente):
-    """Busca o vendedor na API do Omie pelo Código"""
+    """Busca o vendedor pelo código, faixa de CEP ou round-robin com histórico."""
     codigo_vendedor = cliente.codigo_vendedor
+
+    # 1. Busca pelo código do vendedor
     if codigo_vendedor:
         user_vendedor = PerfilUsuario.objects.filter(codigo_vendedor=codigo_vendedor).first()
-        if not user_vendedor:
+        if user_vendedor:
+            return user_vendedor.usuario, 1
+        else:
             vendedor_omie = buscar_vendedor_omie(codigo_vendedor)
             if vendedor_omie:
                 email = vendedor_omie.get('email', '')
                 if email:
                     user_vendedor = User.objects.filter(email=email).first()
                     if user_vendedor:
-                        perfil_usuario, created = PerfilUsuario.objects.get_or_create(usuario=user_vendedor)
+                        perfil_usuario, _ = PerfilUsuario.objects.get_or_create(usuario=user_vendedor)
                         perfil_usuario.codigo_vendedor = codigo_vendedor
                         perfil_usuario.save()
-        else:
-            user_vendedor = user_vendedor.usuario
+                        return user_vendedor, 1
 
-    #### CASO NÃO EXISTE VENDEDOR VER PROXIMO CEP 
+    # 2. Busca por faixa de CEP
+    cep_cliente = int(str(cliente.cep)[:5])
+    vendedor_cep = PerfilUsuario.objects.filter(
+        usuario__groups__name__icontains="Vendas",
+        cep_inicio__lte=cep_cliente,
+        cep_fim__gte=cep_cliente,
+        ativo=True
+    ).first()
 
-    #### CASO NÂO EXISTE CEP VAI PELA LISTA DE PROXIMO
+    if vendedor_cep:
+        return vendedor_cep.usuario, 2
 
-    return user_vendedor
+    # 3. Busca pelo round-robin com histórico
+    vendedores = PerfilUsuario.objects.filter(
+        usuario__groups__name__icontains="Vendas",
+        ativo=True
+    ).annotate(
+        total_leads=Count('usuario__leadassignment')
+    ).order_by('total_leads', 'usuario__leadassignment__data_atribuicao')
+
+    if vendedores.exists():
+        return vendedores.first().usuario, 3
+
+
+    # 4. O Laercio
+    vendedor_laercio = User.objects.filter(first_name__icontains="Laercio").first()
+    return vendedor_laercio
+
 
 def buscar_produto_omie(codigo_produto):
     """Busca o produto na API do Omie pelo Código"""

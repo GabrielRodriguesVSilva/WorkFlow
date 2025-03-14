@@ -40,12 +40,40 @@
                     <h2 class="text-lg font-semibold text-white">Análise do Lead</h2>
                 </div>
                 <hr class="border-t-2 border-white my-2">
-        
+
+
+                <!-- Exibição do Vendedor Indicado e Motivo -->
+                {% if lead.user_indicado %}
+                    <div class="mb-4 p-4 bg-gray-800 text-white rounded-lg flex items-center space-x-4">
+                        <!-- Foto do Usuário -->
+                        {% if lead.user_indicado.perfil.foto %}
+                            <img src="{{ lead.user_indicado.perfil.foto.url }}" 
+                                alt="Foto de {{ lead.user_indicado.username }}" 
+                                class="w-12 h-12 rounded-full border-2 border-gray-600 object-cover">
+                        {% else %}
+                            <div class="w-12 h-12 flex items-center justify-center bg-gray-700 text-white rounded-full border-2 border-gray-600">
+                                {{ lead.user_indicado.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Informações do Vendedor -->
+                        <div>
+                            <p class="text-lg font-semibold"> Vendedor indicado: {{ lead.user_indicado.get_full_name|default:lead.user_indicado.username }}</p>
+                            <p class="text-sm text-gray-400"> Motivo: {{ lead.get_vendedor_mot_display }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mb-4 p-4 bg-gray-800 text-gray-400 rounded-lg text-center">
+                        <p>Vendedor ainda não definido.</p>
+                    </div>
+                {% endif %}
+
+
                 <form method="POST" action="{% url 'edit_lead_analise' lead.id %}">
                     {% csrf_token %}
-        
+
                     <div class="mb-4">
-                        <label class="text-white text-sm">Vendedor Responsavel:</label>
+                        <label class="text-white text-sm">Vendedor Responsável:</label>
                         <select name="vendedor" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600">
                             <option value="">-- Selecione --</option>
                             {% for vendedor in vendedores %}
@@ -55,18 +83,19 @@
                             {% endfor %}
                         </select>
                     </div>
-        
+
                     <div class="mb-4">
                         <label class="text-white text-sm">Informações para o vendedor:</label>
                         <textarea name="analise" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" required></textarea>
                     </div>
-        
+
                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
                         Enviar Análise
                     </button>
                 </form>
             </div>
         {% endif %}
+
 
         <!-- Atendimento do Lead -->
         {% if lead.status == 1 and perms.fluxo.pode_modificar_atendimento %}
