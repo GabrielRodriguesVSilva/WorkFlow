@@ -247,9 +247,10 @@ def add_lead(request, cliente_id):
 
         if origem_vendedor == 3:
             LeadAssignment.objects.create(lead=lead, vendedor=vendedor)
-            lead.user_indicado = vendedor
-            lead.vendedor_mot = origem_vendedor
-            lead.save()
+            
+        lead.user_indicado = vendedor
+        lead.vendedor_mot = origem_vendedor
+        lead.save()
 
 
         #Criar Ação de Criação	

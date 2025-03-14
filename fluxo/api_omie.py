@@ -118,7 +118,6 @@ from django.db.models import Max
 def vendedor_indicado(cliente):
     """Busca o vendedor pelo código, faixa de CEP ou round-robin com histórico."""
     codigo_vendedor = cliente.codigo_vendedor
-    print(codigo_vendedor)
     # 1. Busca pelo código do vendedor
     if codigo_vendedor:
         user_vendedor = PerfilUsuario.objects.filter(codigo_vendedor=codigo_vendedor).first()
@@ -128,6 +127,7 @@ def vendedor_indicado(cliente):
             vendedor_omie = buscar_vendedor_omie(codigo_vendedor)
             if vendedor_omie:
                 email = vendedor_omie.get('email', '')
+                print(email)
                 if email:
                     user_vendedor = User.objects.filter(email=email).first()
                     if user_vendedor:
@@ -162,7 +162,7 @@ def vendedor_indicado(cliente):
 
     # 4. O Laercio
     vendedor_laercio = User.objects.filter(first_name__icontains="Laercio").first()
-    return vendedor_laercio
+    return vendedor_laercio, 0
 
 
 def buscar_produto_omie(codigo_produto):
