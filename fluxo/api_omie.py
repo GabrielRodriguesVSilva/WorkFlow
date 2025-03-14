@@ -118,7 +118,7 @@ from django.db.models import Max
 def vendedor_indicado(cliente):
     """Busca o vendedor pelo código, faixa de CEP ou round-robin com histórico."""
     codigo_vendedor = cliente.codigo_vendedor
-
+    print(codigo_vendedor)
     # 1. Busca pelo código do vendedor
     if codigo_vendedor:
         user_vendedor = PerfilUsuario.objects.filter(codigo_vendedor=codigo_vendedor).first()

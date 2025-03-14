@@ -34,5 +34,6 @@ admin.site.register(Cliente)
 admin.site.register(Lead)
 admin.site.register(PerfilUsuario)
 admin.site.register(LeadAcao)
-admin.site.register(Produto, ProdutoAdmin)  # Registrar Produto com ProdutoAdmin
+admin.site.register(Produto, ProdutoAdmin)
+admin.site.register(LeadAssignment)
 
