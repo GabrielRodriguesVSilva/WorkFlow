@@ -117,6 +117,9 @@ def edit_user(request, user_id):
     user_edit = User.objects.get(id=user_id)
     grupos = Group.objects.all()  # Lista de grupos disponíveis
 
+    # Garantir que o perfil do usuário existe
+    perfil_usuario, created = PerfilUsuario.objects.get_or_create(usuario=user_edit)
+
     if request.method == "POST":
         # Atualizar os campos básicos do usuário
         user_edit.username = request.POST.get('username')
@@ -125,6 +128,12 @@ def edit_user(request, user_id):
         user_edit.email = request.POST.get('email')
         password = request.POST.get('password')
 
+        # Atualizar CEPs no perfil do usuário
+        if request.POST.get('cep_int') and request.POST.get('cep_fim'):
+            perfil_usuario.cep_inicio = request.POST.get('cep_int')
+            perfil_usuario.cep_fim = request.POST.get('cep_fim')
+            perfil_usuario.save()
+
         # Atualizar a senha se fornecida
         if password:
             user_edit.set_password(password)
@@ -132,7 +141,6 @@ def edit_user(request, user_id):
         # Atualizar foto de perfil
         foto = request.FILES.get('foto')
         if foto:
-            perfil_usuario, created = PerfilUsuario.objects.get_or_create(usuario=user_edit)
             perfil_usuario.foto = foto
             perfil_usuario.save()
 
@@ -187,16 +195,12 @@ def buscar_clientes(request):
 
     if not cnpj:
         return render(request, 'Main/Fluxo/Includes/msg_cliente_nao_encontrado.html', {"messages": "CNPJ não informado!"})
+    user = request.user
+    cliente_omie = add_cliente_da_omie(cnpj)
+    if not cliente_omie:
+        return render(request, 'Main/Fluxo/Includes/msg_cliente_nao_encontrado.html', {"messages": "Cliente não encontrado na Omie!"})
 
-    # Verifica primeiro no banco de dados
-    cliente = Cliente.objects.filter(documento=cnpj).first()
-
-    if not cliente:
-        cliente_omie = add_cliente_da_omie(cnpj)
-        if not cliente_omie:
-            return render(request, 'Main/Fluxo/Includes/msg_cliente_nao_encontrado.html', {"messages": "Cliente não encontrado na Omie!"})
-
-        cliente = cliente_omie  # Cliente vindo da Omie
+    cliente = cliente_omie  # Cliente vindo da Omie
 
     # Contexto incluindo os choices do modelo Lead
     context = {
@@ -222,36 +226,40 @@ def add_lead(request, cliente_id):
         cliente_final = request.POST.get('cliente_final')
         solicitacao = request.POST.get('solicitacao')
         criador = request.user
+
+
+        vendedor_ind = vendedor_indicado(cliente)
+        print(vendedor_ind)
         
-        # Criando o lead no banco de dados
-        lead = Lead.objects.create(
-            cliente=cliente,
-            finalidade=finalidade,
-            criador=criador,
-            tipo=tipo,
-            origem=origem,
-            temperatura=temperatura,
-            ticket=ticket,
-            cliente_final=cliente_final,
-            solicitacao=solicitacao,
-            valor=0,
-        )
+        # # Criando o lead no banco de dados
+        # lead = Lead.objects.create(
+        #     cliente=cliente,
+        #     finalidade=finalidade,
+        #     criador=criador,
+        #     tipo=tipo,
+        #     origem=origem,
+        #     temperatura=temperatura,
+        #     ticket=ticket,
+        #     cliente_final=cliente_final,
+        #     solicitacao=solicitacao,
+        #     valor=0,
+        # )
 
-        #Criar Ação de Criação	
-        LeadAcao.objects.create(
-            lead=lead,
-            usuario=criador,
-            acao=0,
-            descricao=f"Lead criado por {criador.username}",
-        )
+        # #Criar Ação de Criação	
+        # LeadAcao.objects.create(
+        #     lead=lead,
+        #     usuario=criador,
+        #     acao=0,
+        #     descricao=f"Lead criado por {criador.username}",
+        # )
 
-        #Adcionar Solicitação do Cliente
-        LeadAcao.objects.create(
-            lead=lead,
-            usuario=criador,
-            acao=3,
-            descricao=solicitacao,
-        )
+        # #Adcionar Solicitação do Cliente
+        # LeadAcao.objects.create(
+        #     lead=lead,
+        #     usuario=criador,
+        #     acao=3,
+        #     descricao=solicitacao,
+        # )
 
         messages.success(request, "Lead adicionado com sucesso!")
         return redirect('fluxo')
@@ -487,10 +495,17 @@ def apc_lead(request, lead_id):
 
     if lead_:
         produtos_lead = LeadProduto.objects.filter(lead=lead_)
+        ultimo_comentario = LeadAcao.objects.filter(acao=6, lead=lead_).order_by('-data').first()
+        itens_anexos = LeadAcao.objects.filter(
+            Q(acao=13) | Q(acao=14) | Q(acao=15),
+            lead=lead_
+        ).order_by('-data')
         context = {
             "lead": lead_,
             "produtos_lead": produtos_lead,
             "STATUS_CHOICES": Lead.STATUS_CHOICES,
+            "ultimo_comentario": ultimo_comentario,
+            "itens_anexos": itens_anexos,
         }
         return render(request, 'Main/Compras/APC/apc_lead.html', context)
     else:

@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.db import IntegrityError
 import traceback
+from django.contrib.auth.models import User
 
 
 # Suas credenciais da API Omie
@@ -12,6 +13,7 @@ OMIE_URL_CLIENTE = "https://app.omie.com.br/api/v1/geral/clientes/"
 OMIE_URL_PRODUTO = "https://app.omie.com.br/api/v1/geral/produtos/"
 OMIE_URL_CUSTO = "https://app.omie.com.br/api/v1/produtos/tabelaprecos/"
 OMIE_URL_PEDIDO = "https://app.omie.com.br/api/v1/produtos/pedido/"
+OMIE_URL_VENDEDOR = "https://app.omie.com.br/api/v1/geral/vendedores/"
 
 OMIE_APP_KEY = "649289350710"
 OMIE_APP_SECRET = "ba03132fbeafde33d7a2f44ed2a7800d"
@@ -58,6 +60,22 @@ def buscar_cliente_omie(id_omie):
         return omie_data
     return None
 
+def buscar_vendedor_omie(codigo_vendedor):
+    """Busca o vendedor na API do Omie pelo Código"""
+    payload = json.dumps({
+        "call": "ConsultarVendedor",
+        "app_key": OMIE_APP_KEY,
+        "app_secret": OMIE_APP_SECRET,
+        "param": [{"codigo": codigo_vendedor}]
+    })
+
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(OMIE_URL_VENDEDOR, headers=headers, data=payload)
+    if response.status_code == 200:
+        omie_data = response.json()
+        return omie_data
+    return None
+
 def add_cliente_da_omie(cnpj):
     """Busca o cliente na API do Omie e insere no banco de dados se não existir"""
     id_omie = buscar_por_cnpj_omie(cnpj)  # Busca o código do cliente na Omie
@@ -67,7 +85,6 @@ def add_cliente_da_omie(cnpj):
     omie_data = buscar_cliente_omie(id_omie)  # Busca os detalhes do cliente
     if not omie_data:
         return False  # Retorna False se não encontrar os detalhes do cliente
-
     try:
         cliente, created = Cliente.objects.update_or_create(
             id_omie=omie_data.get("codigo_cliente_omie"),
@@ -86,12 +103,38 @@ def add_cliente_da_omie(cnpj):
                 "logradouro": omie_data.get("endereco", ""),
                 "instituicao": omie_data.get("inscricao_estadual", ""),
                 "contribuinte": omie_data.get("contribuinte") == "S",
+                "codigo_vendedor": omie_data.get('recomendacoes').get('codigo_vendedor', 0),
             }
         )
+
         return cliente
 
     except IntegrityError:
         return False
+
+def vendedor_indicado(cliente):
+    """Busca o vendedor na API do Omie pelo Código"""
+    codigo_vendedor = cliente.codigo_vendedor
+    if codigo_vendedor:
+        user_vendedor = PerfilUsuario.objects.filter(codigo_vendedor=codigo_vendedor).first()
+        if not user_vendedor:
+            vendedor_omie = buscar_vendedor_omie(codigo_vendedor)
+            if vendedor_omie:
+                email = vendedor_omie.get('email', '')
+                if email:
+                    user_vendedor = User.objects.filter(email=email).first()
+                    if user_vendedor:
+                        perfil_usuario, created = PerfilUsuario.objects.get_or_create(usuario=user_vendedor)
+                        perfil_usuario.codigo_vendedor = codigo_vendedor
+                        perfil_usuario.save()
+        else:
+            user_vendedor = user_vendedor.usuario
+
+    #### CASO NÃO EXISTE VENDEDOR VER PROXIMO CEP 
+
+    #### CASO NÂO EXISTE CEP VAI PELA LISTA DE PROXIMO
+
+    return user_vendedor
 
 def buscar_produto_omie(codigo_produto):
     """Busca o produto na API do Omie pelo Código"""

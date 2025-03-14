@@ -6,6 +6,10 @@ class PerfilUsuario(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="perfil")
     foto = models.ImageField(upload_to="perfil_fotos/", blank=True, null=True)
     ativo = models.BooleanField(default=True)
+    cep_inicio = models.IntegerField(blank=True, null=True)
+    cep_fim = models.IntegerField(blank=True, null=True)
+    codigo_vendedor = models.IntegerField(blank=True, null=True)
+
 
     class Meta:
         permissions = [
@@ -36,6 +40,7 @@ class Cliente(models.Model):
 
     instituicao = models.CharField(max_length=255, blank=True, null=True)
     contribuinte = models.BooleanField(default=False)
+    codigo_vendedor = models.IntegerField(blank=True, null=True)
     
 
 
@@ -46,6 +51,7 @@ class Lead(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=False)
     criador = models.ForeignKey(User, on_delete=models.CASCADE, related_name="leads_criador")
     responsavel = models.ForeignKey(User, on_delete=models.CASCADE, related_name="leads_responsavel", null=True)
+    user_indicado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="leads_indicado", null=True)
     
     STATUS_CHOICES = [
         (0, 'Análise'),
@@ -187,6 +193,7 @@ class LeadAcao(models.Model):
     data = models.DateTimeField(auto_now_add=True)
     imagem = models.FileField(upload_to="leads_arquivos/", blank=True, null=True)
     pdf_omie = models.FileField(upload_to="leads_omie/", blank=True, null=True)
+    
 
     def __str__(self):
         return f"Ação: {self.get_acao_display()} - {self.lead} - {self.data.strftime('%d/%m/%Y %H:%M')}"
