@@ -127,7 +127,6 @@ def vendedor_indicado(cliente):
             vendedor_omie = buscar_vendedor_omie(codigo_vendedor)
             if vendedor_omie:
                 email = vendedor_omie.get('email', '')
-                print(email)
                 if email:
                     user_vendedor = User.objects.filter(email=email).first()
                     if user_vendedor:

@@ -1,6 +1,6 @@
 <!-- Modal -->
 <div class="fixed inset-0 flex items-start justify-center bg-gray-900 bg-opacity-10 top-10">
-    <div class="bg-gray-900 p-6 rounded-2xl shadow-xl w-[800px] text-white relative max-h-[90vh] overflow-auto custom-scroll">
+    <div class="bg-gray-900 p-6 rounded-2xl w-[800px] text-white relative max-h-[90vh] overflow-auto custom-scroll">
         
         <!-- Botão de Fechar -->
         <button type="button" id="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition">
@@ -38,7 +38,7 @@
         <!-- Spinner de carregamento -->
         <div class="htmx-indicator mt-2 text-gray-400">🔄 Buscando...</div>
 
-        <div id="clientes-sugestoes" class="flex flex-col items-center justify-center w-full text-center"></div>
+        <div id="clientes-sugestoes" class="max-h-[60vh] overflow-auto w-full"></div>
 
     </div>
 </div>

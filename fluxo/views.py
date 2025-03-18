@@ -230,7 +230,6 @@ def add_lead(request, cliente_id):
 
         vendedor, origem_vendedor = vendedor_indicado(cliente)
 
-        
         # Criando o lead no banco de dados
         lead = Lead.objects.create(
             cliente=cliente,
@@ -268,6 +267,29 @@ def add_lead(request, cliente_id):
             acao=3,
             descricao=solicitacao,
         )
+
+        # Salvar os arquivos enviados
+        arquivos = request.FILES.getlist('anexos')
+        for arquivo in arquivos:
+
+            ext = os.path.splitext(arquivo.name)[1].lower()
+
+            ext = os.path.splitext(arquivo.name)[1].lower()  # Obtém a extensão do arquivo
+
+            if ext in [".jpg", ".jpeg", ".png", ".gif", ".bmp"]:
+                acao_tipo = "13"
+            elif ext == ".pdf":
+                acao_tipo = "14"
+            else:
+                acao_tipo = "15"
+
+            LeadAcao.objects.create(
+                usuario=request.user,
+                lead=lead,
+                acao=acao_tipo,
+                descricao=f"Anexo enviado com sucesso",
+                imagem=arquivo,
+            )
 
         messages.success(request, "Lead adicionado com sucesso!")
         return redirect('fluxo')
@@ -444,7 +466,6 @@ def edit_lead_atendimento(request, lead_id):
         orcamento_omie = request.POST.get('orcamento_omie')
         if orcamento_omie:
             orc_omie = buscar_infos_do_orcamento(orcamento_omie)
-            print(orc_omie)
             if not orc_omie:
                 messages.error(request, "Orçamento do Omie Não Encontrado!")
                 return redirect('lead', lead_id)
