@@ -461,6 +461,7 @@ def deletar_produto_lead(request, produto_lead_id):
 
 @login_required
 def edit_lead_atendimento(request, lead_id):
+    print("Lead atendimento", lead_id)
     lead_ = Lead.objects.get(id=lead_id)
     if lead_:
         orcamento_omie = request.POST.get('orcamento_omie')
@@ -470,6 +471,7 @@ def edit_lead_atendimento(request, lead_id):
                 messages.error(request, "Orçamento do Omie Não Encontrado!")
                 return redirect('lead', lead_id)
 
+        print("Orc", orcamento_omie)
 
         forma_pagamento = request.POST.get('forma_pagamento')
         atendimento = request.POST.get('atendimento')
@@ -486,6 +488,7 @@ def edit_lead_atendimento(request, lead_id):
         lead_.forma_pagamento = forma_pagamento
         lead_.status = 2
         lead_.atendimento_em = timezone.now()
+        print("Lead atualizado", lead_)
         lead_.save()
 
         LeadAcao.objects.create(

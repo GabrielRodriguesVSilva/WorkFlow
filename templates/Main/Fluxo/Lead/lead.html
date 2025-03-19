@@ -109,7 +109,10 @@
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="text-white text-sm">Numero do Orçamento do Omie*:</label>
-                            <input type="text" name="orcamento_omie" value="{{ lead.orcamento_omie|default:'' }}" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600" required>
+                            <input type="text" name="orcamento_omie" value="{{ lead.orcamento_omie|default:'' }}"
+                            class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600"
+                            required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                     
                         </div>
                         <div>
                             <label class="text-white text-sm">Forma de pagamento*:</label>
