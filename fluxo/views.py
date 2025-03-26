@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
@@ -71,6 +72,17 @@ def home(request):
 def usuarios(request):
     users = User.objects.all()
     return render(request, 'Main/Usuarios/usuarios.html', {"users": users})
+
+@login_required
+@user_passes_test(is_allowed_to_view_usuarios, login_url='/')
+def gerenciar_setores(request):
+    permissoes_leads = Permission.objects.filter(codename__startswith="pode_")  # Permissões do Lead
+    permissoes_perfil = Permission.objects.filter(codename="gerencia_usuario")  # Permissão do PerfilUsuario
+
+    permissoes = permissoes_leads | permissoes_perfil  # Junta as permissões
+    grupos = Group.objects.all()
+    context = {"permissoes": permissoes, "grupos": grupos}
+    return render(request, 'Main/Usuarios/gerenciar_setores.html', context)
 
 @login_required
 @user_passes_test(is_allowed_to_view_usuarios, login_url='/')
@@ -461,7 +473,6 @@ def deletar_produto_lead(request, produto_lead_id):
 
 @login_required
 def edit_lead_atendimento(request, lead_id):
-    print("Lead atendimento", lead_id)
     lead_ = Lead.objects.get(id=lead_id)
     if lead_:
         orcamento_omie = request.POST.get('orcamento_omie')
@@ -471,7 +482,6 @@ def edit_lead_atendimento(request, lead_id):
                 messages.error(request, "Orçamento do Omie Não Encontrado!")
                 return redirect('lead', lead_id)
 
-        print("Orc", orcamento_omie)
 
         forma_pagamento = request.POST.get('forma_pagamento')
         atendimento = request.POST.get('atendimento')
@@ -488,7 +498,6 @@ def edit_lead_atendimento(request, lead_id):
         lead_.forma_pagamento = forma_pagamento
         lead_.status = 2
         lead_.atendimento_em = timezone.now()
-        print("Lead atualizado", lead_)
         lead_.save()
 
         LeadAcao.objects.create(

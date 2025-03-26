@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('usuarios/', usuarios, name='usuarios'),
+    path('gerenciar_setores/', gerenciar_setores, name='gerenciar_setores'),
     path('add_user/', add_user, name='add_user'),
     path('user/<int:user_id>/', edit_user, name='edit_user'),
     path('fluxo/', fluxo, name='fluxo'),
