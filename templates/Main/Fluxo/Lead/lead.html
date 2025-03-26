@@ -12,7 +12,7 @@
         <a href="{% url 'fluxo' %}">
             <span class="material-symbols-outlined text-2xl mr-2" translate="no">arrow_back_ios_new</span>
         </a>
-        Lead N° {{ lead.id }} - {{ lead.cliente.nome_fantasia }} {% if lead.orcamento_omie %} / N° Omie {{ lead.orcamento_omie }} {% endif %}
+        Lead N° {{ lead.id }} - {{ lead.cliente.nome_fantasia|safe }} {% if lead.orcamento_omie %} / N° Omie {{ lead.orcamento_omie }} {% endif %}
     </div>
 
     <!-- Linha divisória -->

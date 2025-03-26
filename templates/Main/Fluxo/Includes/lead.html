@@ -1,7 +1,7 @@
 {% load static %}
 <a href="{% url 'lead' lead.id %}" class="block bg-gray-700 p-4 rounded-lg shadow mb-2 transition-all duration-300 hover:bg-gray-600">
     <strong>N°: {{ lead.id }}</strong> 
-    <p>{{ lead.cliente.nome_fantasia }}</p>
+    <p>{{ lead.cliente.nome_fantasia|safe }}</p>
 
     <div class="flex items-center justify-between mt-2">
         {% if lead.status <= 1 %}
