@@ -88,32 +88,32 @@ def add_cliente_da_omie(cnpj):
     omie_data = buscar_cliente_omie(id_omie)  # Busca os detalhes do cliente
     if not omie_data:
         return False  # Retorna False se não encontrar os detalhes do cliente
-    try:
-        cliente, created = Cliente.objects.update_or_create(
-            id_omie=omie_data.get("codigo_cliente_omie"),
-            defaults={
-                "empresa": omie_data.get("razao_social", ""),
-                "nome_fantasia": omie_data.get("nome_fantasia", ""),
-                "documento": omie_data.get("cnpj_cpf", ""),
-                "tipo": "PJ" if omie_data.get("pessoa_fisica") == "N" else "PF",
-                "nome_contato": omie_data.get("contato", ""),
-                "email": omie_data.get("email", ""),
-                "telefone": f"{omie_data.get('telefone1_ddd', '')} {omie_data.get('telefone1_numero', '')}".strip(),
-                "cep": omie_data.get("cep", ""),
-                "estado": omie_data.get("estado", ""),
-                "cidade": omie_data.get("cidade", ""),
-                "bairro": omie_data.get("bairro", ""),
-                "logradouro": omie_data.get("endereco", ""),
-                "instituicao": omie_data.get("inscricao_estadual", ""),
-                "contribuinte": omie_data.get("contribuinte") == "S",
-                "codigo_vendedor": omie_data.get('recomendacoes').get('codigo_vendedor', 0),
-            }
-        )
+    # try:
+    cliente, created = Cliente.objects.update_or_create(
+        id_omie=omie_data.get("codigo_cliente_omie"),
+        defaults={
+            "empresa": omie_data.get("razao_social", ""),
+            "nome_fantasia": omie_data.get("nome_fantasia", ""),
+            "documento": omie_data.get("cnpj_cpf", ""),
+            "tipo": "PJ" if omie_data.get("pessoa_fisica") == "N" else "PF",
+            "nome_contato": omie_data.get("contato", ""),
+            "email": omie_data.get("email", ""),
+            "telefone": f"{omie_data.get('telefone1_ddd', '')} {omie_data.get('telefone1_numero', '')}".strip(),
+            "cep": omie_data.get("cep", ""),
+            "estado": omie_data.get("estado", ""),
+            "cidade": omie_data.get("cidade", ""),
+            "bairro": omie_data.get("bairro", ""),
+            "logradouro": omie_data.get("endereco", ""),
+            "instituicao": omie_data.get("inscricao_estadual", ""),
+            "contribuinte": omie_data.get("contribuinte") == "S",
+            "codigo_vendedor": omie_data.get('recomendacoes').get('codigo_vendedor', 0),
+        }
+    )
 
-        return cliente
+    return cliente
 
-    except IntegrityError:
-        return False
+    # except IntegrityError:
+    #     return False
 
 from django.db.models import Max
 

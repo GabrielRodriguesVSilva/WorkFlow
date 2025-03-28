@@ -29,7 +29,7 @@ class Cliente(models.Model):
 
 
     nome_contato = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     
     cep = models.CharField(max_length=255, blank=True, null=True)
