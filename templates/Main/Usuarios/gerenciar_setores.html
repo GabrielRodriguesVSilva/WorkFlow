@@ -7,41 +7,58 @@
 {% block content %}
 
 <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-4 flex flex-col overflow-auto custom-scroll">
-    <div class="p-6 rounded-lg bg-gray-900">
-        <h2 class="text-xl font-bold mb-4">Criar Setor</h2>
-        
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
-            {% csrf_token %}
-            
-            <!-- Nome do Setor -->
-            <div class="flex flex-col">
-                <label for="setor_nome" class="text-white mb-2">Nome do Setor</label>
-                <input type="text" id="setor_nome" name="setor_nome" placeholder="Digite o nome do setor"
-                       class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
+    <div class="bg-opacity-20 bg-white text-white rounded-lg shadow-lg p-4 flex flex-col overflow-auto custom-scroll">
+        <div class="p-6 rounded-lg bg-gray-900">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Editar Setor</h2>
+                {% if not novo %}
+                    <a href="{% url 'add_setor' %}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        + Criar Novo Setor
+                    </a>
+                {% endif %}
             </div>
-            
-            <!-- Permissões -->
-            <div class="flex flex-col">
-                <label class="text-white mb-2">Permissões</label>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-gray-800 p-4 rounded-lg">
-                    {% for permissao in permissoes %}
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" id="perm_{{ permissao.id }}" name="permissoes" value="{{ permissao.id }}" 
-                                   class="form-checkbox h-5 w-5 text-blue-500">
-                            <label for="perm_{{ permissao.id }}" class="text-white">{{ permissao.name }}</label>
-                        </div>
-                    {% endfor %}
+    
+            <form {% if novo %} action="{% url 'add_setor' %}" {% else %} action="{% url 'edit_setor' setor.id %}" {% endif %} method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+    
+                <!-- Nome do Setor -->
+                <div class="flex flex-col">
+                    <label for="setor_nome" class="text-white mb-2">Nome do Setor</label>
+                    <input type="text" id="setor_nome" name="setor_nome" value="{{ setor.name }}"
+                           class="px-4 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white" required>
                 </div>
-            </div>
-            
-            <!-- Botão de Submissão -->
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                    Criar Setor
-                </button>
-            </div>
-        </form>
+    
+                <!-- Permissões -->
+                <div class="flex flex-col">
+                    <label class="text-white mb-2">Permissões</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-gray-800 p-4 rounded-lg">
+                        {% for permissao in permissoes %}
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="perm_{{ permissao.id }}" name="permissoes" value="{{ permissao.id }}"
+                                       class="form-checkbox h-5 w-5 text-blue-500"
+                                       {% if permissao in setor_permissoes %} checked {% endif %}>
+                                <label for="perm_{{ permissao.id }}" class="text-white">{{ permissao.name }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+    
+                <!-- Botão de Submissão -->
+                <div class="flex justify-end">
+                    {% if novo %}
+                        <button type="submit" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                            Criar Setor
+                        </button>
+                    {% else %}
+                        <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Atualizar Setor
+                        </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
     </div>
+    
 
     <div class="p-6 rounded-lg bg-gray-900 mt-4">
         <h2 class="text-xl font-bold mb-4">Todos os Setores</h2>
@@ -59,11 +76,11 @@
                     <td class="p-2 border border-gray-600">{{ grupo.name }}</td>
                     <td class="p-2 border border-gray-600 flex justify-center space-x-2">
                         <!-- Botão Editar -->
-                        <a href="" class="text-yellow-500 hover:text-yellow-400">
+                        <a href="{% url 'edit_setor' grupo.id %}" class="text-yellow-500 hover:text-yellow-400">
                             <span class="material-symbols-outlined">edit</span>
                         </a>
                         <!-- Botão Excluir -->
-                        <a href="" class="text-red-500 hover:text-red-400">
+                        <a href="{% url 'delete_setor' grupo.id %}"  class="text-red-500 hover:text-red-400">
                             <span class="material-symbols-outlined">delete</span>
                         </a>
                     </td>

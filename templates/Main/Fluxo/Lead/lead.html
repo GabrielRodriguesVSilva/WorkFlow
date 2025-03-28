@@ -58,7 +58,7 @@
 
                         <!-- Informações do Vendedor -->
                         <div>
-                            <p class="text-lg font-semibold"> Vendedor indicado: {{ lead.user_indicado.get_full_name|default:lead.user_indicado.username }}</p>
+                            <p class="text-lg font-semibold"> Vendedor selecionado: {{ lead.responsavel.get_full_name|default:lead.user_indicado.username }}</p>
                             <p class="text-sm text-gray-400"> Motivo: {{ lead.get_vendedor_mot_display }}</p>
                         </div>
                     </div>
@@ -73,11 +73,11 @@
                     {% csrf_token %}
 
                     <div class="mb-4">
-                        <label class="text-white text-sm">Vendedor Responsável:</label>
+                        <label class="text-white text-sm">Altere o vendedor caso necessario:</label>
                         <select name="vendedor" class="w-full p-2 bg-gray-800 text-white rounded-lg border border-gray-600">
                             <option value="">-- Selecione --</option>
                             {% for vendedor in vendedores %}
-                                <option value="{{ vendedor.id }}">
+                                <option value="{{ vendedor.id }}" {% if vendedor.id == lead.responsavel.id %} selected {% endif %}>
                                     {{ vendedor.get_full_name|default:vendedor.username }}
                                 </option>
                             {% endfor %}

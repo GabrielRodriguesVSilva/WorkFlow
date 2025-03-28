@@ -81,7 +81,70 @@ def gerenciar_setores(request):
 
     permissoes = permissoes_leads | permissoes_perfil  # Junta as permissões
     grupos = Group.objects.all()
-    context = {"permissoes": permissoes, "grupos": grupos}
+    novo = True
+    context = {"permissoes": permissoes, "grupos": grupos, "novo": novo}
+    return render(request, 'Main/Usuarios/gerenciar_setores.html', context)
+
+@login_required
+@user_passes_test(is_allowed_to_view_usuarios, login_url='/')
+def add_setor(request):
+    if request.method == "POST":
+        nome_setor = request.POST.get("setor_nome")
+        permissoes_ids = request.POST.getlist("permissoes")
+
+        if not nome_setor:
+            messages.error(request, "O nome do setor é obrigatório.")
+            return redirect("gerenciar_setores")
+
+        # Criando o grupo (setor)
+        setor, created = Group.objects.get_or_create(name=nome_setor)
+
+        # Adicionando permissões ao setor
+        permissoes = Permission.objects.filter(id__in=permissoes_ids)
+        setor.permissions.set(permissoes)
+
+        messages.success(request, f"Setor '{nome_setor}' criado com sucesso!")
+
+    return redirect("gerenciar_setores")
+
+@login_required
+def delete_setor(request, id_setor):
+    setor = Group.objects.get(id=id_setor)
+    setor.delete()
+    messages.success(request, f"O setor '{setor.name}' foi deletado com sucesso!")
+    return redirect("gerenciar_setores")
+
+@login_required
+def edit_setor(request, id_setor):
+    setor = Group.objects.get(id=id_setor)
+
+    permissoes_leads = Permission.objects.filter(codename__startswith="pode_")  # Permissões do Lead
+    permissoes_perfil = Permission.objects.filter(codename="gerencia_usuario")  # Permissão do PerfilUsuario
+
+    permissoes = permissoes_leads | permissoes_perfil  # Junta as permissões
+    setor_permissoes = setor.permissions.all()
+    grupos = Group.objects.all()
+
+    if request.method == "POST":
+        # Atualizar o nome do setor
+        setor.name = request.POST.get("setor_nome")
+        setor.save()
+
+        # Atualizar permissões do setor
+        permissoes_selecionadas = request.POST.getlist("permissoes")
+        setor.permissions.set(permissoes_selecionadas)
+
+        messages.success(request, "Setor atualizado com sucesso!")
+
+        return redirect("gerenciar_setores")  # Redireciona após edição
+    
+    context = {
+        "setor": setor,
+        "permissoes": permissoes,
+        "setor_permissoes": setor_permissoes,
+        "grupos": grupos
+    }
+    
     return render(request, 'Main/Usuarios/gerenciar_setores.html', context)
 
 @login_required
@@ -260,6 +323,7 @@ def add_lead(request, cliente_id):
             LeadAssignment.objects.create(lead=lead, vendedor=vendedor)
             
         lead.user_indicado = vendedor
+        lead.responsavel = vendedor
         lead.vendedor_mot = origem_vendedor
         lead.save()
 
@@ -326,7 +390,9 @@ def lead(request, lead_id):
         return redirect('fluxo') 
 
     try:
-        vendedores = User.objects.filter(groups__name__icontains="Vendas")
+        vendedores = User.objects.filter(
+            Q(groups__name__icontains="Vendas") | Q(username__iexact="Laercio")
+        ).distinct()
     except:
         vendedores = User.objects.all()
 
@@ -363,11 +429,20 @@ def edit_lead_analise(request, lead_id):
     lead_ = Lead.objects.get(id=lead_id)
     if lead_:
         responsavel_id = request.POST.get('vendedor')
-        responsavel = User.objects.get(id=responsavel_id)
-        if not responsavel:
-            messages.error(request, "Responsável não encontrado!")
-            return redirect('fluxo')
-        lead_.responsavel = responsavel
+        if responsavel_id:
+            responsavel = User.objects.get(id=responsavel_id)
+            if not responsavel:
+                messages.error(request, "Responsável não encontrado!")
+                return redirect('fluxo')
+            lead_.responsavel = responsavel
+
+            LeadAcao.objects.create(
+                lead=lead_,
+                usuario=request.user,
+                acao=5,
+                descricao=f"O {request.user.username} indicou o responsável para o Lead {responsavel.username}",
+            )
+
         lead_.status = 1
         lead_.analisado_em = timezone.now()
         lead_.save()
@@ -381,12 +456,7 @@ def edit_lead_analise(request, lead_id):
             descricao=analise,
         )
 
-        LeadAcao.objects.create(
-            lead=lead_,
-            usuario=request.user,
-            acao=5,
-            descricao=f"O {request.user.username} indicou o responsável para o Lead {responsavel.username}",
-        )
+
 
         LeadAcao.objects.create(
             lead=lead_,
