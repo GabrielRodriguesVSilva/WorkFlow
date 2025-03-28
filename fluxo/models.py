@@ -21,7 +21,7 @@ class PerfilUsuario(models.Model):
 
 class Cliente(models.Model):
     id_omie = models.IntegerField(unique=True)
-    empresa = models.CharField(max_length=255, unique=True)
+    empresa = models.CharField(max_length=255)
     nome_fantasia = models.CharField(max_length=255)
     documento = models.CharField(max_length=255)
     tipo = models.CharField(max_length=255, blank=True, null=True)

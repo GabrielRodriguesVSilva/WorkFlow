@@ -83,6 +83,8 @@ def add_cliente_da_omie(cnpj):
     if not id_omie:
         return False  # Retorna False se não encontrar o cliente na Omie
 
+
+
     omie_data = buscar_cliente_omie(id_omie)  # Busca os detalhes do cliente
     if not omie_data:
         return False  # Retorna False se não encontrar os detalhes do cliente
