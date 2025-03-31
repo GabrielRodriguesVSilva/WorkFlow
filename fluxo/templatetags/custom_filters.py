@@ -13,7 +13,6 @@ def calcular_preco(produto):
     try:
         codigo_produto = produto.codigo_produto
         produto_omie = buscar_produto_omie_detalhes(codigo_produto)
-        print("produto_omie", produto_omie)
         if not produto_omie:
             return 0
         else:

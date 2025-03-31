@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.db.models import Count, Min
 from django.db import IntegrityError
+from django.db.models import Max
 import traceback
 from django.contrib.auth.models import User
 
@@ -17,7 +18,7 @@ OMIE_URL_PEDIDO = "https://app.omie.com.br/api/v1/produtos/pedido/"
 OMIE_URL_VENDEDOR = "https://app.omie.com.br/api/v1/geral/vendedores/"
 
 OMIE_APP_KEY = "649289350710"
-OMIE_APP_SECRET = "ba03132fbeafde33d7a2f44ed2a7800d"
+OMIE_APP_SECRET = "69074b44197392922cf73d235ad29f13"
 
 def buscar_por_cnpj_omie(cnpj):
     """Busca o priemio da lista cliente pelo CNPJ na API do Omie"""
@@ -115,8 +116,6 @@ def add_cliente_da_omie(cnpj):
     # except IntegrityError:
     #     return False
 
-from django.db.models import Max
-
 def vendedor_indicado(cliente):
     """Busca o vendedor pelo código, faixa de CEP ou round-robin com histórico."""
     codigo_vendedor = cliente.codigo_vendedor
@@ -164,7 +163,6 @@ def vendedor_indicado(cliente):
     # 4. O Laercio
     vendedor_laercio = User.objects.filter(first_name__icontains="Laercio").first()
     return vendedor_laercio, 0
-
 
 def buscar_produto_omie(codigo_produto):
     """Busca o produto na API do Omie pelo Código"""
