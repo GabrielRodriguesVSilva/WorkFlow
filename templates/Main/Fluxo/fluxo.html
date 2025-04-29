@@ -8,11 +8,26 @@
 
 {% block content %}
 <div class="p-2">
-    <!-- Título com Ícone -->
-    <div class="flex items-center text-white text-2xl font-bold">
-        <span class="material-symbols-outlined text-2xl mr-2" translate="no">sync_alt</span>
-        Fluxo
-    </div>
+    <form method="GET" action="{% url 'fluxo' %}" class="flex items-center justify-center text-white font-bold relative">
+        <!-- Ícone e Texto à esquerda -->
+        <div class="flex items-center absolute left-0 text-2xl">
+            <span class="material-symbols-outlined text-2xl mr-2" translate="no">sync_alt</span>
+            Fluxo
+        </div>
+    
+        <!-- Barra de Pesquisa Centralizada -->
+        <div class="relative w-64">
+            <input 
+                type="text" 
+                name="q"
+                value="{{ request.GET.q }}" 
+                placeholder="CNPJ ou N° Omie..." 
+                class="w-full py-2 pl-10 pr-4 rounded-xl bg-white/10 text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white focus:bg-white/20 transition text-base"
+            >
+            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-white pointer-events-none" translate="no">search</span>
+        </div>
+    </form>
+    
 
     <!-- Linha divisória -->
     <hr class="border-t-2 border-white my-1">

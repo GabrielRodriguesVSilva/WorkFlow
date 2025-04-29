@@ -240,6 +240,9 @@ def edit_user(request, user_id):
 @login_required
 @user_passes_test(is_allowed_to_view_fluxo, login_url='/')
 def fluxo(request):
+    # Obtendo o parâmetro de pesquisa (se houver)
+    query = request.GET.get('q', '')
+
     # Verifica se o usuário tem permissão para ver todos os leads
     if request.user.has_perm('fluxo.pode_ver_todos_leads'):
         # Usuário pode ver todos os leads
@@ -248,6 +251,12 @@ def fluxo(request):
         # Caso contrário, mostra apenas os leads que o usuário é responsável ou criou
         leads = Lead.objects.filter(
             Q(status=0, criador=request.user) | Q(responsavel=request.user)
+        )
+
+    # Se houver uma busca, aplica o filtro
+    if query:
+        leads = leads.filter(
+            Q(cliente__documento__icontains=query) | Q(orcamento_omie__icontains=query)
         )
 
     # Organize os leads por status
@@ -259,6 +268,7 @@ def fluxo(request):
     context = {
         'leads_por_status': leads_por_status,
         'status_choices': dict(Lead.STATUS_CHOICES),
+        'query': query,  # Passa a query para o template
     }
 
     return render(request, 'Main/Fluxo/fluxo.html', context)
