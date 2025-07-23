@@ -40,44 +40,32 @@ class IPv4Adapter(HTTPAdapter):
         return super().proxy_manager_for(*args, **kwargs)
 
 # ====================== SUA FUNÇÃO MODIFICADA =======================
-def buscar_por_cnpj_omie(cnpj):
-    print("OMIE_APP_KEY", OMIE_APP_KEY)
-    print("OMIE_APP_SECRET", OMIE_APP_SECRET)
+import httpx
 
-    payload = json.dumps({
+def buscar_por_cnpj_omie(cnpj):
+    payload = {
         "call": "ListarClientesResumido",
         "app_key": OMIE_APP_KEY,
         "app_secret": OMIE_APP_SECRET,
-        "param": [
-            {
-                "pagina": 1,
-                "registros_por_pagina": 1,
-                "apenas_importado_api": "N",
-                "ClientesFiltro": {
-                    "cnpj_cpf": cnpj
-                }
+        "param": [{
+            "pagina": 1,
+            "registros_por_pagina": 1,
+            "apenas_importado_api": "N",
+            "ClientesFiltro": {
+                "cnpj_cpf": cnpj
             }
-        ]
-    })
+        }]
+    }
 
     headers = {'Content-Type': 'application/json'}
-    print("HEADERS", headers)
-    print("PAYLOAD", payload)
 
-    session = requests.Session()
-    session.mount("https://", IPv4Adapter())
-    
-    try:
-        response = session.post(OMIE_URL_CLIENTE, headers=headers, data=payload, timeout=10)
-        print('response', response)
-        print("RESPOSTA", response.status_code)
-        if response.status_code == 200:
-            omie_data = response.json()
-            id_omie = omie_data.get('clientes_cadastro_resumido')[0].get('codigo_cliente')
-            return id_omie
-    except requests.exceptions.RequestException as e:
-        print("Erro na requisição:", e)
+    with httpx.Client(timeout=10) as client:
+        response = client.post(OMIE_URL_CLIENTE, headers=headers, json=payload)
 
+    print("STATUS", response.status_code)
+    if response.status_code == 200:
+        omie_data = response.json()
+        return omie_data.get('clientes_cadastro_resumido', [{}])[0].get('codigo_cliente')
     return None
 
 def buscar_cliente_omie(id_omie):
