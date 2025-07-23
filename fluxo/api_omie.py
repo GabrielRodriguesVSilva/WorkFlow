@@ -22,6 +22,8 @@ OMIE_APP_SECRET = "11329593b619e2bfff80f2beabb845df"
 
 def buscar_por_cnpj_omie(cnpj):
     """Busca o priemio da lista cliente pelo CNPJ na API do Omie"""
+    print("OMIE_APP_KEY", OMIE_APP_KEY)
+    print("OMIE_APP_SECRET", OMIE_APP_SECRET)
     payload = json.dumps({
         "call": "ListarClientesResumido",
         "app_key": OMIE_APP_KEY,
@@ -39,8 +41,10 @@ def buscar_por_cnpj_omie(cnpj):
     })
 
     headers = {'Content-Type': 'application/json'}
+    print("HEADERS", headers)
+    print("PAYLOAD", payload)
     response = requests.post(OMIE_URL_CLIENTE, headers=headers, data=payload)
-    print('BUSCANDO CNPJ', cnpj)
+    print('response', response)
     print("RESPOSTA", response.status_code)
     if response.status_code == 200:
         omie_data = response.json()
