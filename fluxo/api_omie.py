@@ -40,6 +40,8 @@ def buscar_por_cnpj_omie(cnpj):
 
     headers = {'Content-Type': 'application/json'}
     response = requests.post(OMIE_URL_CLIENTE, headers=headers, data=payload)
+    print('BUSCANDO CNPJ', cnpj)
+    print("RESPOSTA", response.status_code)
     if response.status_code == 200:
         omie_data = response.json()
         id_omie = omie_data.get('clientes_cadastro_resumido')[0].get('codigo_cliente')
@@ -79,6 +81,7 @@ def buscar_vendedor_omie(codigo_vendedor):
     return None
 
 def add_cliente_da_omie(cnpj):
+    print('ADD CLIENTE', cnpj)
     """Busca o cliente na API do Omie e insere no banco de dados se não existir"""
     id_omie = buscar_por_cnpj_omie(cnpj)  # Busca o código do cliente na Omie
     if not id_omie:
