@@ -278,6 +278,8 @@ def fluxo(request):
 def buscar_clientes(request):
     cnpj = request.GET.get('cliente')
 
+    print('BUSCANDO CLIENTE', cnpj)
+
     if not cnpj:
         return render(request, 'Main/Fluxo/Includes/msg_cliente_nao_encontrado.html', {"messages": "CNPJ não informado!"})
     user = request.user

@@ -111,6 +111,8 @@ def add_cliente_da_omie(cnpj):
         }
     )
 
+    print("CLIENTE", cliente)
+
     return cliente
 
     # except IntegrityError:
