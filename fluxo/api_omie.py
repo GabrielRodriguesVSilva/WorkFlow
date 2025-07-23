@@ -18,7 +18,7 @@ OMIE_URL_PEDIDO = "https://app.omie.com.br/api/v1/produtos/pedido/"
 OMIE_URL_VENDEDOR = "https://app.omie.com.br/api/v1/geral/vendedores/"
 
 OMIE_APP_KEY = "649289350710"
-OMIE_APP_SECRET = "69074b44197392922cf73d235ad29f13"
+OMIE_APP_SECRET = "11329593b619e2bfff80f2beabb845df"
 
 def buscar_por_cnpj_omie(cnpj):
     """Busca o priemio da lista cliente pelo CNPJ na API do Omie"""
