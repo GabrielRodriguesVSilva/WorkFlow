@@ -8,6 +8,10 @@ from django.db import IntegrityError
 from django.db.models import Max
 import traceback
 from django.contrib.auth.models import User
+import socket
+import json
+from requests.adapters import HTTPAdapter
+from urllib3.util.connection import create_connection
 
 
 # Suas credenciais da API Omie
@@ -20,36 +24,60 @@ OMIE_URL_VENDEDOR = "https://app.omie.com.br/api/v1/geral/vendedores/"
 OMIE_APP_KEY = "649289350710"
 OMIE_APP_SECRET = "11329593b619e2bfff80f2beabb845df"
 
+# Forçar IPv4 ao criar conexão
+def ipv4_create_connection(address, *args, **kwargs):
+    host, port = address
+    return create_connection((socket.gethostbyname(host), port), *args, **kwargs)
+
+# Adaptador para forçar IPv4
+class IPv4Adapter(HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['socket_options'] = kwargs.get('socket_options', [])
+        return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs['socket_options'] = kwargs.get('socket_options', [])
+        return super().proxy_manager_for(*args, **kwargs)
+
+# ====================== SUA FUNÇÃO MODIFICADA =======================
 def buscar_por_cnpj_omie(cnpj):
-    """Busca o priemio da lista cliente pelo CNPJ na API do Omie"""
     print("OMIE_APP_KEY", OMIE_APP_KEY)
     print("OMIE_APP_SECRET", OMIE_APP_SECRET)
+
     payload = json.dumps({
         "call": "ListarClientesResumido",
         "app_key": OMIE_APP_KEY,
         "app_secret": OMIE_APP_SECRET,
         "param": [
-                    {
-                        "pagina": 1,
-                        "registros_por_pagina": 1,
-                        "apenas_importado_api": "N",
-                        "ClientesFiltro": {
-                            "cnpj_cpf": cnpj
-                        }
-                    }
-                ]
+            {
+                "pagina": 1,
+                "registros_por_pagina": 1,
+                "apenas_importado_api": "N",
+                "ClientesFiltro": {
+                    "cnpj_cpf": cnpj
+                }
+            }
+        ]
     })
 
     headers = {'Content-Type': 'application/json'}
     print("HEADERS", headers)
     print("PAYLOAD", payload)
-    response = requests.post(OMIE_URL_CLIENTE, headers=headers, data=payload)
-    print('response', response)
-    print("RESPOSTA", response.status_code)
-    if response.status_code == 200:
-        omie_data = response.json()
-        id_omie = omie_data.get('clientes_cadastro_resumido')[0].get('codigo_cliente')
-        return id_omie
+
+    session = requests.Session()
+    session.mount("https://", IPv4Adapter())
+    
+    try:
+        response = session.post(OMIE_URL_CLIENTE, headers=headers, data=payload, timeout=10)
+        print('response', response)
+        print("RESPOSTA", response.status_code)
+        if response.status_code == 200:
+            omie_data = response.json()
+            id_omie = omie_data.get('clientes_cadastro_resumido')[0].get('codigo_cliente')
+            return id_omie
+    except requests.exceptions.RequestException as e:
+        print("Erro na requisição:", e)
+
     return None
 
 def buscar_cliente_omie(id_omie):
